@@ -1,0 +1,185 @@
+.anime-detail-page {
+  min-height: 100vh;
+  background-color: $bg-color;
+  padding-bottom: 40px;
+
+  .loading {
+    text-align: center;
+    padding: 100px 20px;
+    color: $text-light;
+  }
+
+  .header {
+    position: relative;
+    width: 100%;
+    height: 400px;
+
+    .cover {
+      width: 100%;
+      height: 100%;
+      filter: blur(10px);
+    }
+
+    .header-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+      padding: 40px 20px 20px;
+
+      .title-section {
+        .title-cn {
+          font-size: 24px;
+          font-weight: bold;
+          color: $white;
+          margin-bottom: $spacing-xs;
+        }
+
+        .title-jp {
+          font-size: $font-size-md;
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+    }
+  }
+
+  .rating-section {
+    display: flex;
+    align-items: center;
+    background-color: $white;
+    padding: $spacing-lg;
+    margin: $spacing-md;
+    border-radius: $radius-md;
+    box-shadow: $shadow-md;
+
+    .rating-score {
+      font-size: 48px;
+      font-weight: bold;
+      color: $orange-color;
+      margin-right: $spacing-lg;
+    }
+
+    .rating-info {
+      .rating-label {
+        font-size: $font-size-md;
+        color: $text-secondary;
+        margin-bottom: 4px;
+      }
+
+      .rating-count {
+        font-size: $font-size-sm;
+        color: $text-light;
+      }
+    }
+  }
+
+  .info-section {
+    background-color: $white;
+    padding: $spacing-md;
+    margin: $spacing-sm $spacing-md;
+    border-radius: $radius-md;
+
+    .section-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: $spacing-md;
+    }
+
+    .summary {
+      font-size: $font-size-md;
+      color: $text-secondary;
+      line-height: 1.8;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: $spacing-sm 0;
+      border-bottom: 1px solid $border-color;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-size: $font-size-md;
+        color: $text-secondary;
+      }
+
+      .info-value {
+        font-size: $font-size-md;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .actions-section {
+    background-color: $white;
+    padding: $spacing-md;
+    margin: $spacing-sm $spacing-md;
+    border-radius: $radius-md;
+
+    .action-buttons {
+      display: flex;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-md;
+    }
+
+    .like-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: $spacing-md;
+      border: 1px solid $border-color;
+      border-radius: $radius-md;
+
+      .like-text {
+        margin-left: $spacing-sm;
+        font-size: $font-size-md;
+        color: $text-secondary;
+      }
+    }
+  }
+
+  .progress-section {
+    background-color: $white;
+    padding: $spacing-md;
+    margin: $spacing-sm $spacing-md;
+    border-radius: $radius-md;
+
+    .section-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $text-primary;
+      margin-bottom: $spacing-md;
+    }
+
+    .progress-selectors {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: $spacing-md;
+
+      .selector {
+        display: flex;
+        align-items: center;
+
+        .selector-label {
+          font-size: $font-size-md;
+          color: $text-secondary;
+        }
+
+        .selector-value {
+          font-size: 24px;
+          font-weight: bold;
+          color: $primary-color;
+          padding: 0 $spacing-md;
+          min-width: 60px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

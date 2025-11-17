@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(node --version)",
+      "Bash(npm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(taro:*)",
+      "Bash(npm run dev:weapp:*)",
+      "WebFetch(domain:bangumi.github.io)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

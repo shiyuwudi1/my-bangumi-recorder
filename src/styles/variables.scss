@@ -1,0 +1,38 @@
+// 豆瓣风格配色
+$primary-color: #42BD56;    // 豆瓣绿
+$orange-color: #F99600;     // 评分橙
+$text-primary: #111;        // 主文字
+$text-secondary: #666;      // 次要文字
+$text-light: #999;          // 浅色文字
+$bg-color: #F5F5F5;         // 背景色
+$border-color: #E5E5E5;     // 边框色
+$white: #FFFFFF;            // 白色
+
+// 间距 - 使用 rpx 单位适配小程序
+$spacing-xs: 16rpx;
+$spacing-sm: 24rpx;
+$spacing-md: 32rpx;
+$spacing-lg: 40rpx;
+$spacing-xl: 48rpx;
+
+// 圆角
+$radius-sm: 8rpx;
+$radius-md: 16rpx;
+$radius-lg: 24rpx;
+
+// 字体大小 - 使用 rpx 单位
+$font-size-xs: 24rpx;
+$font-size-sm: 26rpx;
+$font-size-md: 28rpx;
+$font-size-lg: 32rpx;
+$font-size-xl: 36rpx;
+$font-size-xxl: 40rpx;
+
+// 阴影 - 小程序不支持复杂阴影，简化处理
+$shadow-sm: 0 4rpx 8rpx rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+
+// 过渡
+$transition-fast: 0.2s ease;
+$transition-base: 0.3s ease;

@@ -1,0 +1,90 @@
+.search-page {
+  min-height: 100vh;
+  background-color: $bg-color;
+
+  .search-header {
+    padding: $spacing-md;
+    background-color: $white;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  .result-list {
+    padding: 0 $spacing-md $spacing-md;
+
+    .anime-card {
+      display: flex;
+      background: $white;
+      border-radius: $radius-md;
+      padding: $spacing-md;
+      margin-bottom: $spacing-md;
+      box-shadow: $shadow-md;
+
+      .cover {
+        width: 100px;
+        height: 140px;
+        border-radius: $radius-sm;
+        overflow: hidden;
+        flex-shrink: 0;
+        margin-right: $spacing-md;
+
+        image {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .title {
+          font-size: $font-size-lg;
+          font-weight: 600;
+          color: $text-primary;
+          margin-bottom: 4px;
+        }
+
+        .subtitle {
+          font-size: $font-size-sm;
+          color: $text-secondary;
+          margin-bottom: $spacing-sm;
+        }
+
+        .rating {
+          display: flex;
+          align-items: center;
+          margin-bottom: $spacing-sm;
+
+          .score {
+            font-size: $font-size-xl;
+            font-weight: bold;
+            color: $orange-color;
+            margin-right: $spacing-xs;
+          }
+
+          .count {
+            font-size: $font-size-xs;
+            color: $text-light;
+          }
+        }
+
+        .summary {
+          font-size: $font-size-sm;
+          color: $text-secondary;
+          line-height: 1.6;
+        }
+      }
+    }
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: $text-light;
+    padding: 80px 20px;
+    font-size: $font-size-md;
+  }
+}
