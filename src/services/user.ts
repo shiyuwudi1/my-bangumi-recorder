@@ -11,29 +11,39 @@ export const login = async (): Promise<User | null> => {
   showLoading('登录中...')
 
   try {
+    console.log('开始调用登录云函数...')
     const res = await callCloudFunction<LoginResult>(CLOUD_FUNCTIONS.LOGIN, {})
+    console.log('登录云函数返回结果:', res)
 
     hideLoading()
 
-    if (res.success && res.data?.success && res.data.user) {
-      const user = res.data.user
+    // res 的结构是: { success: true, isNewUser: false, user: {...} }
+    // 或者是: { success: true, data: { success: true, isNewUser: false, user: {...} } }
+    // 需要判断具体是哪种
+    const loginResult = (res.data || res) as any
+    console.log('登录结果解析:', loginResult)
+
+    if (res.success && loginResult.user) {
+      const user = loginResult.user
       // 存储到本地
       setStorage(STORAGE_KEYS.USER, user)
 
-      if (res.data.isNewUser) {
+      if (loginResult.isNewUser) {
         showToast('欢迎加入！', 'success')
       } else {
         showToast('登录成功', 'success')
       }
 
       return user
-    } else {
-      showToast(res.error || '登录失败')
-      return null
     }
+
+    console.error('登录失败，返回数据:', res)
+    showToast(res.error || '登录失败')
+    return null
   } catch (error) {
     hideLoading()
-    showToast('登录失败')
+    console.error('登录异常:', error)
+    showToast('登录失败: ' + (error.message || error))
     return null
   }
 }

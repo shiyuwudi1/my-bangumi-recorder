@@ -5,6 +5,9 @@
   "appid": "wx51724e8191fbbfe7",
   "cloudfunctionRoot": "cloud/functions/",
   "cloudbaseRoot": "cloud/",
+  "cloudfunctionConfig": {
+    "envId": "cloud1-0gm9nrtr92a7787e"
+  },
   "setting": {
     "urlCheck": true,
     "es6": false,

@@ -12,12 +12,29 @@
   .header {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 500px;
+    background-color: #000;
 
     .cover {
       width: 100%;
       height: 100%;
-      filter: blur(10px);
+      filter: blur(20px);
+      opacity: 0.3;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .cover-image {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 380px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      z-index: 2;
     }
 
     .header-overlay {
@@ -27,6 +44,7 @@
       right: 0;
       background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
       padding: 40px 20px 20px;
+      z-index: 3;
 
       .title-section {
         .title-cn {
@@ -186,40 +204,70 @@
   .progress-section {
     background-color: $white;
     padding: $spacing-md;
-    margin: $spacing-sm $spacing-md;
+    margin: $spacing-sm $spacing-md 40px;
     border-radius: $radius-md;
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-md;
+    }
 
     .section-title {
       font-size: $font-size-lg;
       font-weight: 600;
       color: $text-primary;
-      margin-bottom: $spacing-md;
     }
 
-    .progress-selectors {
+    .progress-stats {
+      font-size: $font-size-sm;
+      color: $text-secondary;
+    }
+
+    .episode-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: $spacing-md;
+    }
+
+    .episode-btn {
+      aspect-ratio: 1;
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 40px;
-      margin-bottom: $spacing-md;
+      font-size: $font-size-md;
+      font-weight: 600;
+      border-radius: 8px;
+      background-color: #E5E5E5;
+      color: #666;
+      transition: all 0.2s ease;
+      cursor: pointer;
 
-      .selector {
-        display: flex;
-        align-items: center;
-
-        .selector-label {
-          font-size: $font-size-md;
-          color: $text-secondary;
-        }
-
-        .selector-value {
-          font-size: 24px;
-          font-weight: bold;
-          color: $primary-color;
-          padding: 0 $spacing-md;
-          min-width: 60px;
-          text-align: center;
-        }
+      &:active {
+        transform: scale(0.95);
       }
+
+      &.watched {
+        background-color: #52C41A;
+        color: $white;
+      }
+
+      &.current {
+        background-color: #1890FF;
+        color: $white;
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(24, 144, 255, 0);
     }
   }
 }

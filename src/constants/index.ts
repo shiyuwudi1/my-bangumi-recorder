@@ -41,7 +41,8 @@ export const CLOUD_FUNCTIONS = {
   UPDATE_WATCH_PROGRESS: 'updateWatchProgress',
   TOGGLE_LIKE: 'toggleLike',
   GET_MY_COLLECTIONS: 'getMyCollections',
-  GET_USER_STATS: 'getUserStats'
+  GET_USER_STATS: 'getUserStats',
+  GET_COLLECTION_DETAIL: 'getCollectionDetail'
 }
 
 // 本地存储 key

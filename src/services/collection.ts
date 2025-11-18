@@ -181,3 +181,24 @@ export const getMyCollections = async (status?: CollectionStatus): Promise<Colle
     return []
   }
 }
+
+/**
+ * 获取收藏详情
+ */
+export const getCollectionDetail = async (animeId: number): Promise<Collection | null> => {
+  try {
+    const res = await callCloudFunction<Collection>(
+      CLOUD_FUNCTIONS.GET_COLLECTION_DETAIL,
+      { animeId }
+    )
+
+    if (res.success && res.data) {
+      return res.data as any
+    } else {
+      return null
+    }
+  } catch (error) {
+    console.error('获取收藏详情失败:', error)
+    return null
+  }
+}

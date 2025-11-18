@@ -3,14 +3,17 @@ import Taro, { useLoad } from '@tarojs/taro'
 import { useState } from 'react'
 import { AtButton, AtIcon } from 'taro-ui'
 import { getAnimeDetail } from '../../services/anime'
-import { addCollection, toggleLike, updateWatchProgress } from '../../services/collection'
+import { addCollection, toggleLike, updateWatchProgress, getCollectionDetail } from '../../services/collection'
 import { COLLECTION_STATUS } from '../../constants'
 import './index.scss'
 
 const AnimeDetail = () => {
   const [anime, setAnime] = useState(null)
   const [isLiked, setIsLiked] = useState(false)
-  const [currentEpisode, setCurrentEpisode] = useState(1)
+  const [currentSeason, setCurrentSeason] = useState(1)
+  const [currentEpisode, setCurrentEpisode] = useState(0)
+  const [watchedEpisodes, setWatchedEpisodes] = useState<number[]>([])
+  const [collectionId, setCollectionId] = useState<string | null>(null)
 
   useLoad((options) => {
     const { id } = options
@@ -24,6 +27,21 @@ const AnimeDetail = () => {
     console.log('Anime detail data:', data)
     if (data) {
       setAnime(data)
+      // 加载收藏详情
+      loadCollectionDetail(animeId)
+    }
+  }
+
+  const loadCollectionDetail = async (animeId) => {
+    const collection = await getCollectionDetail(animeId)
+    if (collection) {
+      setCollectionId(collection._id)
+      setIsLiked(collection.isLiked || false)
+      setCurrentSeason(collection.currentSeason || 1)
+      setCurrentEpisode(collection.currentEpisode || 0)
+      // 根据当前集数生成已观看列表
+      const watched = Array.from({ length: collection.currentEpisode || 0 }, (_, i) => i + 1)
+      setWatchedEpisodes(watched)
     }
   }
 
@@ -43,6 +61,8 @@ const AnimeDetail = () => {
         title: `已添加到${COLLECTION_STATUS[status].label}`,
         icon: 'success'
       })
+      // 重新加载收藏详情
+      loadCollectionDetail(anime.id)
     }
   }
 
@@ -68,21 +88,87 @@ const AnimeDetail = () => {
     }
   }
 
-  const handleUpdateProgress = async () => {
+  const handleEpisodeClick = async (episode: number) => {
+    if (!anime) return
+
+    // 检查是否已收藏
+    if (!collectionId) {
+      Taro.showToast({
+        title: '请先添加到收藏',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 判断是标记还是取消标记
+    const isWatched = watchedEpisodes.includes(episode)
+
+    if (isWatched) {
+      // 取消标记：只能取消最后一集
+      if (episode === currentEpisode) {
+        const newEpisode = episode - 1
+        await updateProgress(newEpisode)
+      } else {
+        Taro.showToast({
+          title: '只能撤销最新进度',
+          icon: 'none'
+        })
+      }
+    } else {
+      // 标记为已看：更新到该集
+      await updateProgress(episode)
+    }
+  }
+
+  const updateProgress = async (episode: number) => {
     if (!anime) return
 
     const success = await updateWatchProgress(
       anime.id,
-      currentEpisode,
+      episode,
       anime.total_episodes || anime.eps || 0
     )
 
     if (success) {
-      Taro.showToast({
-        title: '进度更新成功',
-        icon: 'success'
-      })
+      setCurrentEpisode(episode)
+      const watched = Array.from({ length: episode }, (_, i) => i + 1)
+      setWatchedEpisodes(watched)
     }
+  }
+
+  // 计算进度百分比
+  const getProgressPercent = () => {
+    const total = anime?.total_episodes || anime?.eps || 0
+    if (total === 0) return 0
+    return Math.round((currentEpisode / total) * 100)
+  }
+
+  // 渲染集数按钮
+  const renderEpisodeButtons = () => {
+    const total = anime?.total_episodes || anime?.eps || 0
+    if (total === 0) return null
+
+    const episodes = Array.from({ length: total }, (_, i) => i + 1)
+
+    return (
+      <View className="episode-grid">
+        {episodes.map((ep) => {
+          const isWatched = watchedEpisodes.includes(ep)
+          const isCurrent = ep === currentEpisode
+          const btnClass = `episode-btn ${isWatched ? 'watched' : ''} ${isCurrent ? 'current' : ''}`
+
+          return (
+            <View
+              key={ep}
+              className={btnClass}
+              onClick={() => handleEpisodeClick(ep)}
+            >
+              {ep}
+            </View>
+          )
+        })}
+      </View>
+    )
   }
 
   if (!anime) {
@@ -99,6 +185,11 @@ const AnimeDetail = () => {
       <View className="header">
         <Image
           className="cover"
+          src={anime.images?.large || anime.images?.common || ''}
+          mode="aspectFill"
+        />
+        <Image
+          className="cover-image"
           src={anime.images?.large || anime.images?.common || ''}
           mode="aspectFill"
         />
@@ -242,26 +333,16 @@ const AnimeDetail = () => {
         </View>
       </View>
 
-      {/* 进度更新 */}
+      {/* 观看进度 */}
       {(anime.total_episodes || anime.eps) && (
         <View className="progress-section">
-          <View className="section-title">更新观看进度</View>
-          <View className="progress-selectors">
-            <View className="selector">
-              <View className="selector-label">看到第</View>
-              <picker
-                mode="selector"
-                range={Array.from({ length: anime.total_episodes || anime.eps || 1 }, (_, i) => i + 1)}
-                onChange={(e) => setCurrentEpisode(e.detail.value + 1)}
-              >
-                <View className="selector-value">{currentEpisode}</View>
-              </picker>
-              <View className="selector-label">集</View>
+          <View className="progress-header">
+            <View className="section-title">观看进度</View>
+            <View className="progress-stats">
+              已看 {currentEpisode}/{anime.total_episodes || anime.eps} 集  进度 {getProgressPercent()}%
             </View>
           </View>
-          <AtButton type="primary" onClick={handleUpdateProgress}>
-            更新进度
-          </AtButton>
+          {renderEpisodeButtons()}
         </View>
       )}
     </View>
