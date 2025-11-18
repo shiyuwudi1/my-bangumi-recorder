@@ -9,7 +9,7 @@ function App(props) {
     // 初始化云开发环境
     if (Taro.cloud) {
       Taro.cloud.init({
-        // env: 'your-env-id', // 请在开通云开发后，将环境ID填入此处
+        env: 'cloud1-1gxr0jzce0d25e7f', // 云开发环境ID
         traceUser: true
       })
     }

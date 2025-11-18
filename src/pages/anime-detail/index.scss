@@ -42,6 +42,28 @@
         }
       }
     }
+
+    .like-button-float {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      z-index: 10;
+
+      &:active {
+        transform: scale(0.9);
+        background: rgba(0, 0, 0, 0.7);
+      }
+    }
   }
 
   .rating-section {
@@ -113,6 +135,40 @@
         color: $text-primary;
       }
     }
+
+    .tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+
+      .tag-item {
+        padding: 4px 12px;
+        background-color: $bg-color;
+        border-radius: 16px;
+        font-size: $font-size-sm;
+        color: $text-secondary;
+      }
+    }
+
+    .collection-stats {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+
+      .stat-item {
+        .stat-value {
+          font-size: 24px;
+          font-weight: bold;
+          color: $primary-color;
+          margin-bottom: 4px;
+        }
+
+        .stat-label {
+          font-size: $font-size-sm;
+          color: $text-light;
+        }
+      }
+    }
   }
 
   .actions-section {
@@ -124,22 +180,6 @@
     .action-buttons {
       display: flex;
       gap: $spacing-sm;
-      margin-bottom: $spacing-md;
-    }
-
-    .like-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: $spacing-md;
-      border: 1px solid $border-color;
-      border-radius: $radius-md;
-
-      .like-text {
-        margin-left: $spacing-sm;
-        font-size: $font-size-md;
-        color: $text-secondary;
-      }
     }
   }
 

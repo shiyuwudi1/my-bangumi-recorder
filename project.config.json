@@ -3,6 +3,8 @@
   "projectname": "my-bangumi",
   "description": "动漫观看进度管理小程序",
   "appid": "wxa371d9a3402b15c4",
+  "cloudfunctionRoot": "cloud/functions/",
+  "cloudbaseRoot": "cloud/",
   "setting": {
     "urlCheck": true,
     "es6": false,
@@ -36,5 +38,6 @@
     "ignore": [],
     "include": []
   },
-  "editorSetting": {}
+  "editorSetting": {},
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
 }

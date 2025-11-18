@@ -10,7 +10,6 @@ import './index.scss'
 const AnimeDetail = () => {
   const [anime, setAnime] = useState(null)
   const [isLiked, setIsLiked] = useState(false)
-  const [currentSeason, setCurrentSeason] = useState(1)
   const [currentEpisode, setCurrentEpisode] = useState(1)
 
   useLoad((options) => {
@@ -22,6 +21,7 @@ const AnimeDetail = () => {
 
   const loadAnimeDetail = async (animeId) => {
     const data = await getAnimeDetail(animeId)
+    console.log('Anime detail data:', data)
     if (data) {
       setAnime(data)
     }
@@ -31,11 +31,11 @@ const AnimeDetail = () => {
     if (!anime) return
 
     const success = await addCollection(
-      anime.bangumiId,
-      anime.nameCn || anime.name,
-      anime.images.common,
+      anime.id,
+      anime.name_cn || anime.name,
+      anime.images?.common || anime.images?.medium || '',
       status,
-      anime.seasons?.length || 1
+      anime.total_episodes || anime.eps || 0
     )
 
     if (success) {
@@ -49,7 +49,7 @@ const AnimeDetail = () => {
   const handleToggleLike = async () => {
     if (!anime) return
 
-    const result = await toggleLike(anime.bangumiId)
+    const result = await toggleLike(anime.id)
     if (result.success && result.isLiked !== undefined) {
       setIsLiked(result.isLiked)
     }
@@ -59,13 +59,16 @@ const AnimeDetail = () => {
     if (!anime) return
 
     const success = await updateWatchProgress(
-      anime.bangumiId,
-      currentSeason,
-      currentEpisode
+      anime.id,
+      currentEpisode,
+      anime.total_episodes || anime.eps || 0
     )
 
     if (success) {
-      // 可以在这里更新UI
+      Taro.showToast({
+        title: '进度更新成功',
+        icon: 'success'
+      })
     }
   }
 
@@ -83,14 +86,22 @@ const AnimeDetail = () => {
       <View className="header">
         <Image
           className="cover"
-          src={anime.images.large || anime.images.common}
+          src={anime.images?.large || anime.images?.common || ''}
           mode="aspectFill"
         />
         <View className="header-overlay">
           <View className="title-section">
-            <View className="title-cn">{anime.nameCn}</View>
+            <View className="title-cn">{anime.name_cn || anime.name}</View>
             <View className="title-jp">{anime.name}</View>
           </View>
+        </View>
+        {/* 喜欢按钮 */}
+        <View className="like-button-float" onClick={handleToggleLike}>
+          <AtIcon
+            value={isLiked ? 'heart-2' : 'heart'}
+            size="28"
+            color={isLiked ? '#FF4757' : '#FFFFFF'}
+          />
         </View>
       </View>
 
@@ -99,7 +110,7 @@ const AnimeDetail = () => {
         <View className="rating-section">
           <View className="rating-score">{anime.rating.score.toFixed(1)}</View>
           <View className="rating-info">
-            <View className="rating-label">豆瓣评分</View>
+            <View className="rating-label">Bangumi评分</View>
             <View className="rating-count">{anime.rating.total}人评分</View>
           </View>
         </View>
@@ -111,21 +122,82 @@ const AnimeDetail = () => {
         <View className="summary">{anime.summary || '暂无简介'}</View>
       </View>
 
+      {/* 标签 */}
+      {anime.tags && anime.tags.length > 0 && (
+        <View className="info-section">
+          <View className="section-title">标签</View>
+          <View className="tags-list">
+            {anime.tags.slice(0, 10).map((tag, index) => (
+              <View key={index} className="tag-item">
+                {tag.name}
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* 收藏统计 */}
+      {anime.collection && (
+        <View className="info-section">
+          <View className="section-title">收藏统计</View>
+          <View className="collection-stats">
+            <View className="stat-item">
+              <View className="stat-value">{anime.collection.wish}</View>
+              <View className="stat-label">想看</View>
+            </View>
+            <View className="stat-item">
+              <View className="stat-value">{anime.collection.doing}</View>
+              <View className="stat-label">在看</View>
+            </View>
+            <View className="stat-item">
+              <View className="stat-value">{anime.collection.collect}</View>
+              <View className="stat-label">看过</View>
+            </View>
+            <View className="stat-item">
+              <View className="stat-value">{anime.collection.on_hold}</View>
+              <View className="stat-label">搁置</View>
+            </View>
+            <View className="stat-item">
+              <View className="stat-value">{anime.collection.dropped}</View>
+              <View className="stat-label">弃坑</View>
+            </View>
+          </View>
+        </View>
+      )}
+
       {/* 基本信息 */}
       <View className="info-section">
         <View className="section-title">基本信息</View>
-        <View className="info-item">
-          <View className="info-label">开播时间</View>
-          <View className="info-value">{anime.airDate}</View>
-        </View>
-        <View className="info-item">
-          <View className="info-label">集数</View>
-          <View className="info-value">{anime.eps}集</View>
-        </View>
-        {anime.seasons && anime.seasons.length > 0 && (
+        {anime.date && (
           <View className="info-item">
-            <View className="info-label">季数</View>
-            <View className="info-value">{anime.seasons.length}季</View>
+            <View className="info-label">开播时间</View>
+            <View className="info-value">{anime.date}</View>
+          </View>
+        )}
+        {anime.total_episodes && (
+          <View className="info-item">
+            <View className="info-label">总集数</View>
+            <View className="info-value">{anime.total_episodes}集</View>
+          </View>
+        )}
+        {anime.eps && (
+          <View className="info-item">
+            <View className="info-label">当前集数</View>
+            <View className="info-value">{anime.eps}集</View>
+          </View>
+        )}
+        {anime.platform && (
+          <View className="info-item">
+            <View className="info-label">平台</View>
+            <View className="info-value">{anime.platform}</View>
+          </View>
+        )}
+        {anime.type !== undefined && (
+          <View className="info-item">
+            <View className="info-label">类型</View>
+            <View className="info-value">
+              {anime.type === 2 ? '动画' : anime.type === 1 ? '书籍' : anime.type === 3 ? '音乐' : anime.type === 4 ? '游戏' : anime.type === 6 ? '三次元' : '其他'}
+            </View>
           </View>
         )}
       </View>
@@ -155,48 +227,30 @@ const AnimeDetail = () => {
             看过
           </AtButton>
         </View>
-
-        <View className="like-button" onClick={handleToggleLike}>
-          <AtIcon
-            value={isLiked ? 'heart-2' : 'heart'}
-            size="24"
-            color={isLiked ? '#FF6B6B' : '#999'}
-          />
-          <View className="like-text">{isLiked ? '已喜欢' : '喜欢'}</View>
-        </View>
       </View>
 
       {/* 进度更新 */}
-      <View className="progress-section">
-        <View className="section-title">更新观看进度</View>
-        <View className="progress-selectors">
-          <View className="selector">
-            <View className="selector-label">第</View>
-            <picker
-              mode="selector"
-              range={Array.from({ length: anime.seasons?.length || 1 }, (_, i) => i + 1)}
-              onChange={(e) => setCurrentSeason(e.detail.value + 1)}
-            >
-              <View className="selector-value">{currentSeason}</View>
-            </picker>
-            <View className="selector-label">季</View>
+      {(anime.total_episodes || anime.eps) && (
+        <View className="progress-section">
+          <View className="section-title">更新观看进度</View>
+          <View className="progress-selectors">
+            <View className="selector">
+              <View className="selector-label">看到第</View>
+              <picker
+                mode="selector"
+                range={Array.from({ length: anime.total_episodes || anime.eps || 1 }, (_, i) => i + 1)}
+                onChange={(e) => setCurrentEpisode(e.detail.value + 1)}
+              >
+                <View className="selector-value">{currentEpisode}</View>
+              </picker>
+              <View className="selector-label">集</View>
+            </View>
           </View>
-          <View className="selector">
-            <View className="selector-label">第</View>
-            <picker
-              mode="selector"
-              range={Array.from({ length: anime.eps }, (_, i) => i + 1)}
-              onChange={(e) => setCurrentEpisode(e.detail.value + 1)}
-            >
-              <View className="selector-value">{currentEpisode}</View>
-            </picker>
-            <View className="selector-label">集</View>
-          </View>
+          <AtButton type="primary" onClick={handleUpdateProgress}>
+            更新进度
+          </AtButton>
         </View>
-        <AtButton type="primary" onClick={handleUpdateProgress}>
-          更新进度
-        </AtButton>
-      </View>
+      )}
     </View>
   )
 }

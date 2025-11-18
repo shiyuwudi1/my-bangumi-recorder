@@ -7,7 +7,8 @@
       "Bash(npm install:*)",
       "Bash(taro:*)",
       "Bash(npm run dev:weapp:*)",
-      "WebFetch(domain:bangumi.github.io)"
+      "WebFetch(domain:bangumi.github.io)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

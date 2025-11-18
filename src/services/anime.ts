@@ -44,17 +44,18 @@ export const searchAnime = async (keyword: string): Promise<AnimeSearchResult[]>
  */
 export const getAnimeDetail = async (animeId: number): Promise<Anime | null> => {
   showLoading('加载中...')
-
+  console.log('获取动漫详情，ID:', animeId)
   try {
-    const res = await callCloudFunction<{ data: Anime }>(
+    const res = await callCloudFunction<Anime>(
       CLOUD_FUNCTIONS.GET_ANIME_DETAIL,
       { animeId }
     )
 
     hideLoading()
+    console.log('动漫详情返回:', res)
 
-    if (res.success && res.data?.data) {
-      return res.data.data
+    if (res.success && res.data) {
+      return res.data
     } else {
       showToast(res.error || '获取详情失败')
       return null
