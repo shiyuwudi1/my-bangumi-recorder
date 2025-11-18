@@ -1,5 +1,5 @@
 import { View } from '@tarojs/components'
-import { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { AtTabs, AtTabsPane } from 'taro-ui'
 import { Collection } from '../../types/collection'
@@ -32,6 +32,12 @@ const MyCollection = () => {
     setWishlist(wish)
   }
 
+  const handleCollectionItemClick = (item: Collection) => {
+    Taro.navigateTo({
+      url: `/pages/anime-detail/index?id=${item.animeId}`
+    })
+  }
+
   const renderCollectionList = (list: Collection[]) => {
     if (list.length === 0) {
       return (
@@ -44,7 +50,11 @@ const MyCollection = () => {
     return (
       <View className="collection-list">
         {list.map((item) => (
-          <View key={item._id} className="collection-item">
+          <View
+            key={item._id}
+            className="collection-item"
+            onClick={() => handleCollectionItemClick(item)}
+          >
             <View className="cover">
               <image src={item.animeCover} mode="aspectFill" />
               {item.isLiked && (
@@ -52,10 +62,10 @@ const MyCollection = () => {
               )}
             </View>
             <View className="content">
-              <View className="title">{item.animeName}</View>
+              <View className="title">{item.animeTitle}</View>
               {item.status === 'watching' && (
                 <View className="progress">
-                  第{item.currentSeason}季 · 第{item.currentEpisode}集
+                  第{item.currentEpisode}集 / 共{item.totalEpisodes}集
                 </View>
               )}
               {item.myRating && (
@@ -71,9 +81,15 @@ const MyCollection = () => {
     )
   }
 
+  const dynamicTabs = [
+    { title: `在看 (${watchingList.length})` },
+    { title: `看过 (${watchedList.length})` },
+    { title: `想看 (${wishlist.length})` }
+  ]
+
   return (
     <View className="my-collection-page">
-      <AtTabs current={current} tabList={tabs} onClick={setCurrent}>
+      <AtTabs current={current} tabList={dynamicTabs} onClick={setCurrent}>
         <AtTabsPane current={current} index={0}>
           <View className="tab-content">
             {renderCollectionList(watchingList)}

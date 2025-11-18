@@ -164,15 +164,15 @@ export const getMyCollections = async (status?: CollectionStatus): Promise<Colle
   showLoading('加载中...')
 
   try {
-    const res = await callCloudFunction<{ data: Collection[] }>(
+    const res = await callCloudFunction<Collection[]>(
       CLOUD_FUNCTIONS.GET_MY_COLLECTIONS,
       { status }
     )
 
     hideLoading()
 
-    if (res.success && res.data?.data) {
-      return res.data.data
+    if (res.success && Array.isArray(res.data)) {
+      return res.data
     } else {
       showToast(res.error || '获取失败')
       return []
