@@ -1,0 +1,98 @@
+@import "@/styles/variables.scss";
+
+.collection-list-page {
+  min-height: 100vh;
+  background-color: $bg-color;
+
+  .list-header {
+    padding: $spacing-md;
+    background-color: $white;
+    border-bottom: 1px solid $border-color;
+
+    .count {
+      font-size: $font-size-md;
+      color: $text-secondary;
+      text-align: right;
+    }
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: $text-light;
+    padding: 80px 20px;
+    font-size: $font-size-md;
+  }
+
+  .collection-list {
+    padding: $spacing-md;
+
+    .collection-item {
+      display: flex;
+      background-color: $white;
+      border-radius: $radius-md;
+      padding: $spacing-md;
+      margin-bottom: $spacing-md;
+      box-shadow: $shadow-sm;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+
+      &:active {
+        transform: translateY(2px);
+        box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.04);
+      }
+
+      .cover {
+        width: 240px;
+        height: 320px;
+        border-radius: $radius-sm;
+        overflow: hidden;
+        flex-shrink: 0;
+        margin-right: $spacing-md;
+        position: relative;
+
+        image {
+          width: 100%;
+          height: 100%;
+        }
+
+        .like-badge {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          font-size: 18px;
+        }
+      }
+
+      .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .title {
+          font-size: $font-size-lg;
+          font-weight: 600;
+          color: $text-primary;
+          margin-bottom: $spacing-xs;
+        }
+
+        .progress {
+          font-size: $font-size-sm;
+          color: $primary-color;
+          margin-bottom: $spacing-xs;
+        }
+
+        .my-rating {
+          font-size: $font-size-sm;
+          color: $orange-color;
+          margin-bottom: $spacing-xs;
+        }
+
+        .note {
+          font-size: $font-size-sm;
+          color: $text-secondary;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+}

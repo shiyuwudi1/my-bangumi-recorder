@@ -4,6 +4,7 @@ export default defineAppConfig({
     'pages/search/index',
     'pages/anime-detail/index',
     'pages/my-collection/index',
+    'pages/collection-list/index',
     'pages/profile/index',
     'pages/login/index'
   ],

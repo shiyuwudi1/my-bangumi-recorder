@@ -48,6 +48,12 @@ const Profile = () => {
     })
   }
 
+  const handleStatClick = (status: 'watching' | 'watched' | 'wishlist') => {
+    Taro.navigateTo({
+      url: `/pages/collection-list/index?status=${status}`
+    })
+  }
+
   if (!user) {
     return null
   }
@@ -71,15 +77,15 @@ const Profile = () => {
 
       {/* 统计信息 */}
       <View className="stats-section">
-        <View className="stat-item">
+        <View className="stat-item" onClick={() => handleStatClick('watching')}>
           <View className="stat-value">{user.stats.watching}</View>
           <View className="stat-label">在看</View>
         </View>
-        <View className="stat-item">
+        <View className="stat-item" onClick={() => handleStatClick('watched')}>
           <View className="stat-value">{user.stats.watched}</View>
           <View className="stat-label">看过</View>
         </View>
-        <View className="stat-item">
+        <View className="stat-item" onClick={() => handleStatClick('wishlist')}>
           <View className="stat-value">{user.stats.wishlist}</View>
           <View className="stat-label">想看</View>
         </View>
