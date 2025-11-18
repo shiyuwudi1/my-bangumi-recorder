@@ -52,6 +52,19 @@ const AnimeDetail = () => {
     const result = await toggleLike(anime.id)
     if (result.success && result.isLiked !== undefined) {
       setIsLiked(result.isLiked)
+    } else if (result.needLogin) {
+      // 需要登录，跳转到登录页
+      Taro.showModal({
+        title: '提示',
+        content: '此操作需要登录，是否前往登录？',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({
+              url: '/pages/login/index'
+            })
+          }
+        }
+      })
     }
   }
 

@@ -131,7 +131,7 @@ export const updateWatchProgress = async (
 /**
  * 切换喜欢状态
  */
-export const toggleLike = async (animeId: number): Promise<{ success: boolean; isLiked?: boolean }> => {
+export const toggleLike = async (animeId: number): Promise<{ success: boolean; isLiked?: boolean; needLogin?: boolean }> => {
   try {
     const res = await callCloudFunction<{ isLiked: boolean }>(
       CLOUD_FUNCTIONS.TOGGLE_LIKE,
@@ -142,6 +142,10 @@ export const toggleLike = async (animeId: number): Promise<{ success: boolean; i
       showToast(res.data.isLiked ? '已喜欢' : '已取消喜欢', 'success')
       return { success: true, isLiked: res.data.isLiked }
     } else {
+      // 检查是否是用户不存在的错误
+      if (res.error === '用户不存在' || res.error === '收藏不存在，请先添加收藏') {
+        return { success: false, needLogin: true }
+      }
       showToast(res.error || '操作失败')
       return { success: false }
     }

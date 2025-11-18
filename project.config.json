@@ -2,7 +2,7 @@
   "miniprogramRoot": "dist/",
   "projectname": "my-bangumi",
   "description": "动漫观看进度管理小程序",
-  "appid": "wxa371d9a3402b15c4",
+  "appid": "wx51724e8191fbbfe7",
   "cloudfunctionRoot": "cloud/functions/",
   "cloudbaseRoot": "cloud/",
   "setting": {
@@ -39,5 +39,6 @@
     "include": []
   },
   "editorSetting": {},
-  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/",
+  "libVersion": "3.11.2"
 }
