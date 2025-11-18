@@ -14,6 +14,7 @@ const AnimeDetail = () => {
   const [currentEpisode, setCurrentEpisode] = useState(0)
   const [watchedEpisodes, setWatchedEpisodes] = useState<number[]>([])
   const [collectionId, setCollectionId] = useState<string | null>(null)
+  const [collectionStatus, setCollectionStatus] = useState<string | null>(null)
 
   useLoad((options) => {
     const { id } = options
@@ -36,6 +37,7 @@ const AnimeDetail = () => {
     const collection = await getCollectionDetail(animeId)
     if (collection) {
       setCollectionId(collection._id)
+      setCollectionStatus(collection.status || null)
       setIsLiked(collection.isLiked || false)
       setCurrentSeason(collection.currentSeason || 1)
       setCurrentEpisode(collection.currentEpisode || 0)
@@ -63,6 +65,11 @@ const AnimeDetail = () => {
       })
       // 重新加载收藏详情
       loadCollectionDetail(anime.id)
+    } else {
+      Taro.showToast({
+        title: '添加失败，请重试',
+        icon: 'none'
+      })
     }
   }
 
@@ -93,9 +100,16 @@ const AnimeDetail = () => {
 
     // 检查是否已收藏
     if (!collectionId) {
-      Taro.showToast({
-        title: '请先添加到收藏',
-        icon: 'none'
+      Taro.showModal({
+        title: '提示',
+        content: '需要先添加到收藏（想看、在看或看过）才能标记观看进度',
+        confirmText: '添加收藏',
+        success: (res) => {
+          if (res.confirm) {
+            // 用户点击确认，可以滚动到操作按钮部分
+            // 这里可以触发滚动到操作按钮
+          }
+        }
       })
       return
     }
@@ -306,30 +320,51 @@ const AnimeDetail = () => {
         )}
       </View>
 
+      {/* 当前收藏状态 */}
+      {collectionStatus && (
+        <View className="collection-status-section">
+          <View className="status-badge" data-status={collectionStatus}>
+            <View className="status-dot"></View>
+            <View className="status-text">
+              已{COLLECTION_STATUS[collectionStatus]?.label || '收藏'}
+            </View>
+          </View>
+        </View>
+      )}
+
       {/* 操作按钮 */}
       <View className="actions-section">
         <View className="action-buttons">
-          <AtButton
-            type="secondary"
-            size="small"
-            onClick={() => handleAddCollection('wishlist')}
+          <View
+            className={`action-btn wishlist ${collectionId ? 'active' : ''}`}
+            onClick={() => {
+              if (!collectionId) {
+                handleAddCollection('wishlist')
+              }
+            }}
           >
             想看
-          </AtButton>
-          <AtButton
-            type="primary"
-            size="small"
-            onClick={() => handleAddCollection('watching')}
+          </View>
+          <View
+            className={`action-btn watching ${collectionId ? 'active' : ''}`}
+            onClick={() => {
+              if (!collectionId) {
+                handleAddCollection('watching')
+              }
+            }}
           >
             在看
-          </AtButton>
-          <AtButton
-            type="secondary"
-            size="small"
-            onClick={() => handleAddCollection('watched')}
+          </View>
+          <View
+            className={`action-btn watched ${collectionId ? 'active' : ''}`}
+            onClick={() => {
+              if (!collectionId) {
+                handleAddCollection('watched')
+              }
+            }}
           >
             看过
-          </AtButton>
+          </View>
         </View>
       </View>
 

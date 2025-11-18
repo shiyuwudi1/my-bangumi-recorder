@@ -12,6 +12,8 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
   const { animeId, currentEpisode, totalEpisodes } = event
 
+  console.log('UpdateWatchProgress params:', { animeId, currentEpisode, totalEpisodes })
+
   if (!animeId || currentEpisode === undefined) {
     return {
       success: false,
@@ -57,7 +59,7 @@ exports.main = async (event, context) => {
       updateTime: Date.now()
     }
 
-    if (totalEpisodes !== undefined) {
+    if (totalEpisodes !== undefined && totalEpisodes > 0) {
       updateData.totalEpisodes = totalEpisodes
     }
 

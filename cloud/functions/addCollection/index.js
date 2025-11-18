@@ -11,7 +11,7 @@ const _ = db.command
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
-  const { animeId, animeTitle, animeCover, status = 'wishlist' } = event
+  const { animeId, animeTitle, animeCover, status = 'wishlist', totalEpisodes = 0 } = event
 
   if (!animeId || !animeTitle) {
     return {
@@ -61,7 +61,7 @@ exports.main = async (event, context) => {
         animeCover: animeCover || '',
         status: status,
         currentEpisode: 0,
-        totalEpisodes: 0,
+        totalEpisodes: totalEpisodes,
         isLiked: false,
         createTime: now,
         updateTime: now

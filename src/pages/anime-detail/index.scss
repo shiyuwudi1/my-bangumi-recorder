@@ -189,6 +189,78 @@
     }
   }
 
+  .collection-status-section {
+    background-color: $white;
+    padding: $spacing-md;
+    margin: $spacing-sm $spacing-md;
+    border-radius: $radius-md;
+    display: flex;
+    justify-content: center;
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      transition: all 0.3s ease;
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        animation: pulse-dot 2s ease-in-out infinite;
+      }
+
+      .status-text {
+        letter-spacing: 0.5px;
+      }
+
+      &[data-status='wishlist'] {
+        background-color: rgba(255, 107, 107, 0.1);
+        color: #FF6B6B;
+        border: 2px solid #FF6B6B;
+
+        .status-dot {
+          background-color: #FF6B6B;
+        }
+      }
+
+      &[data-status='watching'] {
+        background-color: rgba(66, 189, 86, 0.1);
+        color: #42BD56;
+        border: 2px solid #42BD56;
+
+        .status-dot {
+          background-color: #42BD56;
+        }
+      }
+
+      &[data-status='watched'] {
+        background-color: rgba(153, 153, 153, 0.1);
+        color: #666;
+        border: 2px solid #999;
+
+        .status-dot {
+          background-color: #999;
+        }
+      }
+    }
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.2);
+    }
+  }
+
   .actions-section {
     background-color: $white;
     padding: $spacing-md;
@@ -198,6 +270,75 @@
     .action-buttons {
       display: flex;
       gap: $spacing-sm;
+
+      .action-btn {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: $radius-md;
+        font-size: $font-size-md;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+
+        &.wishlist {
+          background-color: #FFE5E5;
+          color: #FF6B6B;
+          border-color: #FF6B6B;
+
+          &.active {
+            background-color: #FF6B6B;
+            color: $white;
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          &:active:not(.active) {
+            transform: scale(0.95);
+            background-color: #FF5252;
+            color: $white;
+          }
+        }
+
+        &.watching {
+          background-color: #E5F5E5;
+          color: #42BD56;
+          border-color: #42BD56;
+
+          &.active {
+            background-color: #42BD56;
+            color: $white;
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          &:active:not(.active) {
+            transform: scale(0.95);
+            background-color: #35A64F;
+            color: $white;
+          }
+        }
+
+        &.watched {
+          background-color: #F5F5F5;
+          color: #999;
+          border-color: #999;
+
+          &.active {
+            background-color: #999;
+            color: $white;
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          &:active:not(.active) {
+            transform: scale(0.95);
+            background-color: #777;
+            color: $white;
+          }
+        }
+      }
     }
   }
 
@@ -226,37 +367,48 @@
     }
 
     .episode-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 8px;
       margin-top: $spacing-md;
+      justify-content: flex-start;
+      align-content: flex-start;
     }
 
     .episode-btn {
-      aspect-ratio: 1;
+      min-width: 52px;
+      width: 52px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: $font-size-md;
       font-weight: 600;
-      border-radius: 8px;
-      background-color: #E5E5E5;
-      color: #666;
-      transition: all 0.2s ease;
+      border-radius: 12px;
+      background-color: transparent;
+      color: #999;
+      border: 2px solid #D9D9D9;
+      transition: all 0.3s ease;
       cursor: pointer;
+      flex-shrink: 0;
 
       &:active {
-        transform: scale(0.95);
+        transform: scale(0.92);
       }
 
       &.watched {
-        background-color: #52C41A;
-        color: $white;
+        background-color: rgba(82, 196, 26, 0.1);
+        color: #52C41A;
+        border-color: #52C41A;
+        box-shadow: 0 2px 8px rgba(82, 196, 26, 0.15);
       }
 
       &.current {
-        background-color: #1890FF;
-        color: $white;
+        background-color: rgba(24, 144, 255, 0.1);
+        color: #1890FF;
+        border-color: #1890FF;
+        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.25);
         animation: pulse 2s ease-in-out infinite;
       }
     }

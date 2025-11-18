@@ -7,20 +7,20 @@ import { CLOUD_FUNCTIONS } from '../constants'
  */
 export const addCollection = async (
   animeId: number,
-  animeName: string,
+  animeTitle: string,
   animeCover: string,
   status: CollectionStatus,
-  totalSeasons: number = 1
+  totalEpisodes: number = 0
 ): Promise<boolean> => {
   showLoading('添加中...')
 
   try {
     const res = await callCloudFunction(CLOUD_FUNCTIONS.ADD_COLLECTION, {
       animeId,
-      animeName,
+      animeTitle,
       animeCover,
       status,
-      totalSeasons
+      totalEpisodes
     })
 
     hideLoading()
@@ -100,16 +100,16 @@ export const updateCollectionStatus = async (
  */
 export const updateWatchProgress = async (
   animeId: number,
-  season: number,
-  episode: number
+  currentEpisode: number,
+  totalEpisodes: number = 0
 ): Promise<boolean> => {
   showLoading('更新进度...')
 
   try {
     const res = await callCloudFunction(CLOUD_FUNCTIONS.UPDATE_WATCH_PROGRESS, {
       animeId,
-      season,
-      episode
+      currentEpisode,
+      totalEpisodes
     })
 
     hideLoading()
