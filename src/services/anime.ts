@@ -16,18 +16,25 @@ export const searchAnime = async (keyword: string): Promise<AnimeSearchResult[]>
   showLoading('搜索中...')
 
   try {
-    const res = await callCloudFunction<{ data: AnimeSearchResult[]; from: string }>(
+    const res = await callCloudFunction<AnimeSearchResult[] | { data: AnimeSearchResult[] }>(
       CLOUD_FUNCTIONS.SEARCH_ANIME,
       { keyword: keyword.trim() }
     )
 
     hideLoading()
 
-    if (res.success && res.data?.data) {
-      // 保存搜索历史
-      saveSearchHistory(keyword.trim())
-
-      return res.data.data
+    if (res.success && res.data) {
+      // 云函数返回 data 是数组，或者 data.data 是数组
+      const resultList = Array.isArray(res.data) ? res.data : (res.data as any).data
+      
+      if (resultList && resultList.length > 0) {
+        // 保存搜索历史
+        saveSearchHistory(keyword.trim())
+        return resultList
+      } else {
+        showToast('未搜索到相关内容')
+        return []
+      }
     } else {
       showToast(res.error || '搜索失败')
       return []

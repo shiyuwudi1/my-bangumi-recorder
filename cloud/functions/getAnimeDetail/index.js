@@ -11,9 +11,15 @@ const db = cloud.database()
 const BANGUMI_API_BASE = 'https://api.bgm.tv'
 
 exports.main = async (event, context) => {
+  console.log('getAnimeDetail 接收到的 event:', JSON.stringify(event))
+  console.log('getAnimeDetail 接收到的 event.animeId:', event.animeId)
+  console.log('getAnimeDetail 接收到的 event 类型:', typeof event)
+  console.log('getAnimeDetail 接收到的 event keys:', Object.keys(event))
+  
   const { animeId } = event
 
   if (!animeId) {
+    console.log('animeId 为空，返回错误')
     return {
       success: false,
       error: '动漫ID不能为空'
@@ -33,9 +39,16 @@ exports.main = async (event, context) => {
     if (cacheRes.data.length > 0) {
       const cache = cacheRes.data[0]
       if (now - cache.updateTime < cacheExpireTime) {
+        // 确保缓存数据中也有 id 字段
+        const cachedData = cache.data
+        const normalizedCacheData = {
+          ...cachedData,
+          id: cachedData.id || animeId,
+          bangumiId: cachedData.id || animeId
+        }
         return {
           success: true,
-          data: cache.data,
+          data: normalizedCacheData,
           from: 'cache'
         }
       }
@@ -49,12 +62,18 @@ exports.main = async (event, context) => {
     })
 
     const animeData = response.data
+    // 确保 id 字段存在，用于前端识别
+    const normalizedData = {
+      ...animeData,
+      id: animeData.id || animeId,
+      bangumiId: animeData.id || animeId
+    }
 
     // 更新或插入缓存
     if (cacheRes.data.length > 0) {
       await db.collection('anime_cache').doc(cacheRes.data[0]._id).update({
         data: {
-          data: animeData,
+          data: normalizedData,
           updateTime: now
         }
       })
@@ -62,7 +81,7 @@ exports.main = async (event, context) => {
       await db.collection('anime_cache').add({
         data: {
           animeId: animeId.toString(),
-          data: animeData,
+          data: normalizedData,
           createTime: now,
           updateTime: now
         }
@@ -71,7 +90,7 @@ exports.main = async (event, context) => {
 
     return {
       success: true,
-      data: animeData,
+      data: normalizedData,
       from: 'api'
     }
   } catch (error) {

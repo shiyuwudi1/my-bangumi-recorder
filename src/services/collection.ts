@@ -138,9 +138,11 @@ export const toggleLike = async (animeId: number): Promise<{ success: boolean; i
       { animeId }
     )
 
-    if (res.success && res.data) {
-      showToast(res.data.isLiked ? '已喜欢' : '已取消喜欢', 'success')
-      return { success: true, isLiked: res.data.isLiked }
+    if (res.success) {
+      // 云函数直接在响应中返回 isLiked，而不是在 data 中
+      const isLiked = res.data?.isLiked !== undefined ? res.data.isLiked : (res as any).isLiked
+      showToast(isLiked ? '已喜欢' : '已取消喜欢', 'success')
+      return { success: true, isLiked }
     } else {
       // 检查是否是用户不存在的错误
       if (res.error === '用户不存在' || res.error === '收藏不存在，请先添加收藏') {

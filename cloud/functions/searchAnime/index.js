@@ -25,7 +25,16 @@ exports.main = async (event, context) => {
       .get()
 
     if (cacheResult.data.length > 0) {
-      return { success: true, data: cacheResult.data, from: 'cache' }
+      // 确保缓存数据有 id 字段
+      const cacheData = cacheResult.data.map(item => ({
+        ...item,
+        id: item.bangumiId,  // 使用 bangumiId 作为 id
+        name: item.name,
+        name_cn: item.nameCn,
+        air_date: item.airDate,
+        eps: item.eps
+      }))
+      return { success: true, data: cacheData, from: 'cache' }
     }
 
     // 2. 缓存未命中，调用Bangumi API
@@ -35,6 +44,11 @@ exports.main = async (event, context) => {
     )
 
     const animeList = response.data.list || []
+
+    console.log('搜索得到的 animeList 数量:', animeList.length)
+    if (animeList.length > 0) {
+      console.log('第一个结果:', JSON.stringify(animeList[0]))
+    }
 
     // 3. 存储到缓存（批量写入）
     const now = Date.now()
@@ -65,7 +79,10 @@ exports.main = async (event, context) => {
       }
     }
 
-    return { success: true, data: animeList, from: 'api' }
+    return { success: true, data: animeList.map(anime => ({
+      ...anime,
+      id: anime.id  // 确保 id 字段存在
+    })), from: 'api' }
 
   } catch (error) {
     console.error('Search error:', error)

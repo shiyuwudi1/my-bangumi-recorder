@@ -31,22 +31,16 @@ export interface AnimeSeason {
 }
 
 export interface AnimeSearchResult {
-  id: number
-  name: string
-  name_cn: string
-  summary: string
-  images: {
-    large: string
-    common: string
-    medium: string
-  }
-  rating: {
-    total: number
-    score: number
-  }
-  eps: number
-  air_date: string
-  type: number
+  _id: string;
+  bangumiId: number;
+  name: string;
+  nameCn: string;
+  summary: string;
+  type: number;
+  airDate: string;
+  images: Images;
+  updateTime: number;
+  expireTime: number;
 }
 
 // 每日放送相关类型

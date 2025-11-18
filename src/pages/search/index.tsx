@@ -26,9 +26,10 @@ const Search = () => {
     setLoading(false)
   }
 
-  const handleAnimeClick = (animeId: number) => {
+  const handleAnimeClick = (anime: AnimeSearchResult) => {
+    console.log('点击了动漫:', anime)
     Taro.navigateTo({
-      url: `/pages/anime-detail/index?id=${animeId}`
+      url: `/pages/anime-detail/index?id=${anime.bangumiId}`
     })
   }
 
@@ -46,7 +47,7 @@ const Search = () => {
             <View
               key={anime.id}
               className="anime-card"
-              onClick={() => handleAnimeClick(anime.id)}
+              onClick={() => handleAnimeClick(anime)}
             >
               <View className="cover">
                 <image src={anime.images.common} mode="aspectFill" />

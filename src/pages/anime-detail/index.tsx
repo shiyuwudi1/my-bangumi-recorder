@@ -15,6 +15,7 @@ const AnimeDetail = () => {
   const [watchedEpisodes, setWatchedEpisodes] = useState<number[]>([])
   const [collectionId, setCollectionId] = useState<string | null>(null)
   const [collectionStatus, setCollectionStatus] = useState<string | null>(null)
+  const [summaryExpanded, setSummaryExpanded] = useState(false)
 
   useLoad((options) => {
     const { id } = options
@@ -234,10 +235,74 @@ const AnimeDetail = () => {
         </View>
       )}
 
+      {/* 操作按钮 */}
+      <View className="actions-section">
+        <View className="action-buttons">
+          <View
+            className={`action-btn wishlist ${collectionStatus === 'wishlist' ? 'active' : ''}`}
+            onClick={() => handleAddCollection('wishlist')}
+          >
+            <View className="btn-label">想看</View>
+            {collectionStatus === 'wishlist' && (
+              <View className="btn-status">
+                <View className="status-dot"></View>
+              </View>
+            )}
+          </View>
+          <View
+            className={`action-btn watching ${collectionStatus === 'watching' ? 'active' : ''}`}
+            onClick={() => handleAddCollection('watching')}
+          >
+            <View className="btn-label">在看</View>
+            {collectionStatus === 'watching' && (
+              <View className="btn-status">
+                <View className="status-dot"></View>
+              </View>
+            )}
+          </View>
+          <View
+            className={`action-btn watched ${collectionStatus === 'watched' ? 'active' : ''}`}
+            onClick={() => handleAddCollection('watched')}
+          >
+            <View className="btn-label">看过</View>
+            {collectionStatus === 'watched' && (
+              <View className="btn-status">
+                <View className="status-dot"></View>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+
+      {/* 观看进度 */}
+      {(anime.total_episodes || anime.eps) && (
+        <View className="progress-section">
+          <View className="progress-header">
+            <View className="section-title">观看进度</View>
+            <View className="progress-stats">
+              已看 {currentEpisode}/{anime.total_episodes || anime.eps} 集  进度 {getProgressPercent()}%
+            </View>
+          </View>
+          {renderEpisodeButtons()}
+        </View>
+      )}
+
       {/* 简介 */}
       <View className="info-section">
         <View className="section-title">简介</View>
-        <View className="summary">{anime.summary || '暂无简介'}</View>
+        <View className="summary-container">
+          <View className={`summary ${summaryExpanded ? 'expanded' : 'collapsed'}`}>
+            {anime.summary || '暂无简介'}
+          </View>
+          {anime.summary && anime.summary.length > 100 && (
+            <View 
+              className="expand-btn"
+              onClick={() => setSummaryExpanded(!summaryExpanded)}
+            >
+              {summaryExpanded ? '收起' : '展开'}
+            </View>
+          )}
+        </View>
       </View>
 
       {/* 标签 */}
@@ -319,67 +384,6 @@ const AnimeDetail = () => {
           </View>
         )}
       </View>
-
-      {/* 当前收藏状态 */}
-      {collectionStatus && (
-        <View className="collection-status-section">
-          <View className="status-badge" data-status={collectionStatus}>
-            <View className="status-dot"></View>
-            <View className="status-text">
-              已{COLLECTION_STATUS[collectionStatus]?.label || '收藏'}
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* 操作按钮 */}
-      <View className="actions-section">
-        <View className="action-buttons">
-          <View
-            className={`action-btn wishlist ${collectionId ? 'active' : ''}`}
-            onClick={() => {
-              if (!collectionId) {
-                handleAddCollection('wishlist')
-              }
-            }}
-          >
-            想看
-          </View>
-          <View
-            className={`action-btn watching ${collectionId ? 'active' : ''}`}
-            onClick={() => {
-              if (!collectionId) {
-                handleAddCollection('watching')
-              }
-            }}
-          >
-            在看
-          </View>
-          <View
-            className={`action-btn watched ${collectionId ? 'active' : ''}`}
-            onClick={() => {
-              if (!collectionId) {
-                handleAddCollection('watched')
-              }
-            }}
-          >
-            看过
-          </View>
-        </View>
-      </View>
-
-      {/* 观看进度 */}
-      {(anime.total_episodes || anime.eps) && (
-        <View className="progress-section">
-          <View className="progress-header">
-            <View className="section-title">观看进度</View>
-            <View className="progress-stats">
-              已看 {currentEpisode}/{anime.total_episodes || anime.eps} 集  进度 {getProgressPercent()}%
-            </View>
-          </View>
-          {renderEpisodeButtons()}
-        </View>
-      )}
     </View>
   )
 }

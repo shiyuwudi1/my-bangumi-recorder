@@ -43,16 +43,37 @@ exports.main = async (event, context) => {
       })
       .get()
 
+    const now = Date.now()
+
+    // 如果已收藏，则更新状态
     if (collectionRes.data.length > 0) {
+      const collection = collectionRes.data[0]
+      const oldStatus = collection.status
+
+      // 更新收藏状态
+      await db.collection('collections').doc(collection._id).update({
+        data: {
+          status: status,
+          updateTime: now
+        }
+      })
+
+      // 更新用户统计（旧状态-1，新状态+1）
+      const statsUpdate = {}
+      statsUpdate[`stats.${oldStatus}`] = _.inc(-1)
+      statsUpdate[`stats.${status}`] = _.inc(1)
+
+      await db.collection('users').doc(user._id).update({
+        data: statsUpdate
+      })
+
       return {
-        success: false,
-        error: '已经收藏过了'
+        success: true,
+        message: '状态已更新'
       }
     }
 
-    const now = Date.now()
-
-    // 添加收藏
+    // 添加新收藏
     await db.collection('collections').add({
       data: {
         userId: user._id,
