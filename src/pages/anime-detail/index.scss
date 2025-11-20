@@ -194,6 +194,22 @@
       .info-value {
         font-size: $font-size-md;
         color: $text-primary;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .loading-icon {
+          animation: rotate 1s linear infinite;
+        }
+      }
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
       }
     }
 

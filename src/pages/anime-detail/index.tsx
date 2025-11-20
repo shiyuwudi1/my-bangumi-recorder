@@ -2,7 +2,7 @@ import { View, Image } from '@tarojs/components'
 import Taro, { useLoad } from '@tarojs/taro'
 import { useState } from 'react'
 import { AtButton, AtIcon } from 'taro-ui'
-import { getAnimeDetail } from '../../services/anime'
+import { getAnimeDetail, getAnimeEpisodes } from '../../services/anime'
 import { addCollection, toggleLike, updateWatchProgress, getCollectionDetail } from '../../services/collection'
 import { COLLECTION_STATUS } from '../../constants'
 import { Anime } from '../../types/anime'
@@ -18,6 +18,8 @@ const AnimeDetail = () => {
   const [collectionId, setCollectionId] = useState<string | null>(null)
   const [collectionStatus, setCollectionStatus] = useState<string | null>(null)
   const [summaryExpanded, setSummaryExpanded] = useState(false)
+  const [airedEpisodes, setAiredEpisodes] = useState(0) // 当前已更新集数
+  const [episodesLoading, setEpisodesLoading] = useState(true) // 集数加载状态
 
   useLoad((options) => {
     const { id } = options
@@ -33,7 +35,18 @@ const AnimeDetail = () => {
       setAnime(data)
       // 加载收藏详情
       loadCollectionDetail(animeId)
+      // 加载剧集信息，获取当前更新集数
+      loadEpisodes(animeId)
     }
+  }
+
+  const loadEpisodes = async (animeId: number) => {
+    setEpisodesLoading(true)
+    const { episodes, currentEpisode } = await getAnimeEpisodes(animeId)
+    console.log('剧集信息:', episodes)
+    console.log('当前更新到第', currentEpisode, '集')
+    setAiredEpisodes(currentEpisode)
+    setEpisodesLoading(false)
   }
 
   const loadCollectionDetail = async (animeId: number) => {
@@ -395,12 +408,16 @@ const AnimeDetail = () => {
             <View className="info-value">{anime.total_episodes}集</View>
           </View>
         )}
-        {anime.eps && (
-          <View className="info-item">
-            <View className="info-label">当前集数</View>
-            <View className="info-value">{anime.eps}集</View>
+        <View className="info-item">
+          <View className="info-label">已更新</View>
+          <View className="info-value">
+            {episodesLoading ? (
+              <AtIcon value='loading-3' size='16' className='loading-icon' />
+            ) : (
+              airedEpisodes > 0 ? `${airedEpisodes}集` : '暂无数据'
+            )}
           </View>
-        )}
+        </View>
         {anime.platform && (
           <View className="info-item">
             <View className="info-label">平台</View>

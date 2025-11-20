@@ -1,4 +1,4 @@
-import { Anime, AnimeSearchResult, CalendarDay } from '../types/anime'
+import { Anime, AnimeSearchResult, CalendarDay, Episode } from '../types/anime'
 import { callCloudFunction, showLoading, hideLoading, showToast } from '../utils/request'
 import { CLOUD_FUNCTIONS, BANGUMI_API_BASE } from '../constants'
 import { saveSearchHistory } from '../utils/storage'
@@ -106,4 +106,60 @@ export const getHotAnime = async (): Promise<AnimeSearchResult[]> => {
   // 这里可以调用云函数获取热门动漫
   // 暂时返回空数组，后续实现
   return []
+}
+
+/**
+ * 获取动漫剧集列表
+ */
+export const getAnimeEpisodes = async (subjectId: number): Promise<{ episodes: any[], currentEpisode: number }> => {
+  try {
+    const res = await Taro.request({
+      url: `${BANGUMI_API_BASE}/v0/episodes`,
+      method: 'GET',
+      data: {
+        subject_id: subjectId,
+        limit: 100,
+        offset: 0
+      },
+      header: {
+        'accept': 'application/json',
+        'User-Agent': 'MyBangumi/1.0 (https://github.com/my-bangumi)'
+      }
+    })
+
+    if (res.statusCode === 200 && res.data) {
+      const episodesData = res.data as any
+      const episodes = episodesData.data || []
+      
+      // 计算当前更新到第几集（根据airdate和今天日期对比）
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      let currentEpisode = 0
+      for (const ep of episodes) {
+        if (ep.airdate) {
+          const airDate = new Date(ep.airdate)
+          airDate.setHours(0, 0, 0, 0)
+          
+          // 如果播出日期小于等于今天，说明已经播出了
+          if (airDate <= today) {
+            currentEpisode = ep.ep
+          } else {
+            break
+          }
+        }
+      }
+      
+      return {
+        episodes,
+        currentEpisode
+      }
+    } else {
+      console.error('获取剧集列表失败:', res)
+      return { episodes: [], currentEpisode: 0 }
+    }
+  } catch (error) {
+    console.error('获取剧集列表出错:', error)
+    return { episodes: [], currentEpisode: 0 }
+  }
 }

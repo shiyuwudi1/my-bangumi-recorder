@@ -123,3 +123,28 @@ export interface Images {
   small: string
   grid: string
 }
+
+// 剧集信息
+export interface Episode {
+  airdate: string
+  name: string
+  name_cn: string
+  duration: string
+  desc: string
+  ep: number
+  sort: number
+  id: number
+  subject_id: number
+  comment: number
+  type: number
+  disc: number
+  duration_seconds: number
+}
+
+// 剧集列表响应
+export interface EpisodesResponse {
+  data: Episode[]
+  total: number
+  limit: number
+  offset: number
+}
