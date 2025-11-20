@@ -97,6 +97,28 @@ const Index = () => {
     return dayData?.items || []
   }
 
+  // 处理图片URL，确保使用HTTPS协议
+  const getSecureImageUrl = (url: string): string => {
+    if (!url) return ''
+    
+    // 如果已经是HTTPS，直接返回
+    if (url.startsWith('https://')) {
+      return url
+    }
+    
+    // 如果是HTTP，替换为HTTPS
+    if (url.startsWith('http://')) {
+      return url.replace('http://', 'https://')
+    }
+    
+    // 如果是相对协议（//开头），添加HTTPS
+    if (url.startsWith('//')) {
+      return `https:${url}`
+    }
+    
+    return url
+  }
+
   return (
     <View className="index-page">
       {/* 搜索框 */}
@@ -165,9 +187,12 @@ const Index = () => {
               >
                 <Image
                   className="anime-cover"
-                  src={anime.images?.common || anime.images?.medium || ''}
+                  src={getSecureImageUrl(anime.images?.common || anime.images?.medium || '')}
                   mode="aspectFill"
                   lazyLoad
+                  onError={(e) => {
+                    console.error('图片加载失败:', e.detail.errMsg)
+                  }}
                 />
                 <View className="anime-info">
                   <Text className="anime-title">
