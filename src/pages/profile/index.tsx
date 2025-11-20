@@ -18,8 +18,8 @@ const Profile = () => {
     setUser(userInfo)
 
     if (!userInfo) {
-      // 未登录，跳转到登录页
-      Taro.navigateTo({
+      // 未登录，跳转到登录页（使用redirectTo避免返回循环）
+      Taro.redirectTo({
         url: '/pages/login/index'
       })
     }
@@ -40,7 +40,7 @@ const Profile = () => {
         if (res.confirm) {
           logout()
           setUser(null)
-          Taro.navigateTo({
+          Taro.redirectTo({
             url: '/pages/login/index'
           })
         }

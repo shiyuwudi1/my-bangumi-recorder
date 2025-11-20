@@ -1,4 +1,4 @@
-import { View } from '@tarojs/components'
+import { View, Image } from '@tarojs/components'
 import Taro, { useLoad } from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { AtLoadMore } from 'taro-ui'
@@ -33,6 +33,28 @@ const Search = () => {
     })
   }
 
+  // 处理图片URL，确保使用HTTPS协议
+  const getSecureImageUrl = (url: string): string => {
+    if (!url) return ''
+    
+    // 如果已经是HTTPS，直接返回
+    if (url.startsWith('https://')) {
+      return url
+    }
+    
+    // 如果是HTTP，替换为HTTPS
+    if (url.startsWith('http://')) {
+      return url.replace('http://', 'https://')
+    }
+    
+    // 如果是相对协议（//开头），添加HTTPS
+    if (url.startsWith('//')) {
+      return `https:${url}`
+    }
+    
+    return url
+  }
+
   return (
     <View className="search-page">
       <View className="search-header">
@@ -45,15 +67,22 @@ const Search = () => {
         <View className="result-list">
           {results.map((anime) => (
             <View
-              key={anime.id}
+              key={anime._id}
               className="anime-card"
               onClick={() => handleAnimeClick(anime)}
             >
               <View className="cover">
-                <image src={anime.images.common} mode="aspectFill" />
+                <Image
+                  src={getSecureImageUrl(anime.images.common)}
+                  mode="aspectFill"
+                  lazyLoad
+                  onError={(e) => {
+                    console.error('图片加载失败:', e.detail.errMsg)
+                  }}
+                />
               </View>
               <View className="content">
-                <View className="title">{anime.name_cn || anime.name}</View>
+                <View className="title">{anime.nameCn || anime.name}</View>
                 <View className="subtitle">{anime.name}</View>
                 {anime.rating && anime.rating.score > 0 && (
                   <View className="rating">

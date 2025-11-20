@@ -158,6 +158,28 @@ const AnimeDetail = () => {
     return Math.round((currentEpisode / total) * 100)
   }
 
+  // 处理图片URL，确保使用HTTPS协议
+  const getSecureImageUrl = (url: string): string => {
+    if (!url) return ''
+    
+    // 如果已经是HTTPS，直接返回
+    if (url.startsWith('https://')) {
+      return url
+    }
+    
+    // 如果是HTTP，替换为HTTPS
+    if (url.startsWith('http://')) {
+      return url.replace('http://', 'https://')
+    }
+    
+    // 如果是相对协议（//开头），添加HTTPS
+    if (url.startsWith('//')) {
+      return `https:${url}`
+    }
+    
+    return url
+  }
+
   // 渲染集数按钮
   const renderEpisodeButtons = () => {
     const total = anime?.total_episodes || anime?.eps || 0
@@ -200,13 +222,21 @@ const AnimeDetail = () => {
       <View className="header">
         <Image
           className="cover"
-          src={anime.images?.large || anime.images?.common || ''}
+          src={getSecureImageUrl(anime.images?.large || anime.images?.common || '')}
           mode="aspectFill"
+          lazyLoad
+          onError={(e) => {
+            console.error('图片加载失败:', e.detail.errMsg)
+          }}
         />
         <Image
           className="cover-image"
-          src={anime.images?.large || anime.images?.common || ''}
+          src={getSecureImageUrl(anime.images?.large || anime.images?.common || '')}
           mode="aspectFill"
+          lazyLoad
+          onError={(e) => {
+            console.error('图片加载失败:', e.detail.errMsg)
+          }}
         />
         <View className="header-overlay">
           <View className="title-section">

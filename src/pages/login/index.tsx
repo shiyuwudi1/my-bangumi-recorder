@@ -1,12 +1,28 @@
 import { View } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { useState } from 'react'
-import { AtButton } from 'taro-ui'
+import { useState, useEffect } from 'react'
+import { AtButton, AtIcon } from 'taro-ui'
 import { login } from '../../services/user'
 import './index.scss'
 
 const Login = () => {
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    // 监听系统返回按键
+    const handleBackPress = () => {
+      handleBack()
+      return true // 阻止默认返回行为
+    }
+
+    // 添加返回按键监听（使用 Taro 的事件监听）
+    Taro.eventCenter.on('__taroRouterBack', handleBackPress)
+
+    // 清理函数
+    return () => {
+      Taro.eventCenter.off('__taroRouterBack', handleBackPress)
+    }
+  }, [])
 
   const handleLogin = async () => {
     setLoading(true)
@@ -23,8 +39,21 @@ const Login = () => {
     }
   }
 
+  const handleBack = () => {
+    // 返回首页
+    Taro.switchTab({
+      url: '/pages/index/index'
+    })
+  }
+
   return (
     <View className="login-page">
+      {/* 返回按钮 */}
+      <View className="back-button" onClick={handleBack}>
+        <AtIcon value="chevron-left" size="20" color="#333" />
+        <View className="back-text">返回</View>
+      </View>
+      
       <View className="login-container">
         <View className="logo">
           <View className="logo-icon">📺</View>
