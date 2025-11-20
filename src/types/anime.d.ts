@@ -3,11 +3,13 @@ export interface Anime {
   id: number
   bangumiId: number
   name: string
-  nameCn: string
+  name_cn: string
   summary: string
   type: number
   eps: number
   airDate: string
+  date: string
+  platform: string
   images: {
     large: string
     common: string
@@ -18,9 +20,38 @@ export interface Anime {
   rating: {
     total: number
     score: number
+    rank: number
+    count: {
+      [key: string]: number
+    }
   }
-  tags?: string[]
+  tags?: Tag[]
   seasons?: AnimeSeason[]
+  infobox?: InfoBoxItem[]
+  total_episodes: number
+  collection?: {
+    on_hold: number
+    dropped: number
+    wish: number
+    collect: number
+    doing: number
+  }
+  meta_tags?: string[]
+  volumes: number
+  series: boolean
+  locked: boolean
+  nsfw: boolean
+}
+
+export interface Tag {
+  name: string
+  count: number
+  total_cont: number
+}
+
+export interface InfoBoxItem {
+  key: string
+  value: string | { v: string }[]
 }
 
 export interface AnimeSeason {
@@ -83,4 +114,12 @@ export interface CalendarWeekday {
 export interface CalendarDay {
   weekday: CalendarWeekday
   items: CalendarItem[]
+}
+
+export interface Images {
+  large: string
+  common: string
+  medium: string
+  small: string
+  grid: string
 }

@@ -5,10 +5,12 @@ import { AtButton, AtIcon } from 'taro-ui'
 import { getAnimeDetail } from '../../services/anime'
 import { addCollection, toggleLike, updateWatchProgress, getCollectionDetail } from '../../services/collection'
 import { COLLECTION_STATUS } from '../../constants'
+import { Anime } from '../../types/anime'
+import { CollectionStatus } from '../../types/collection'
 import './index.scss'
 
 const AnimeDetail = () => {
-  const [anime, setAnime] = useState(null)
+  const [anime, setAnime] = useState<Anime | null>(null)
   const [isLiked, setIsLiked] = useState(false)
   const [currentSeason, setCurrentSeason] = useState(1)
   const [currentEpisode, setCurrentEpisode] = useState(0)
@@ -24,7 +26,7 @@ const AnimeDetail = () => {
     }
   })
 
-  const loadAnimeDetail = async (animeId) => {
+  const loadAnimeDetail = async (animeId: number) => {
     const data = await getAnimeDetail(animeId)
     console.log('Anime detail data:', data)
     if (data) {
@@ -34,7 +36,7 @@ const AnimeDetail = () => {
     }
   }
 
-  const loadCollectionDetail = async (animeId) => {
+  const loadCollectionDetail = async (animeId: number) => {
     const collection = await getCollectionDetail(animeId)
     if (collection) {
       setCollectionId(collection._id)
@@ -48,7 +50,7 @@ const AnimeDetail = () => {
     }
   }
 
-  const handleAddCollection = async (status) => {
+  const handleAddCollection = async (status: CollectionStatus) => {
     if (!anime) return
 
     const success = await addCollection(
@@ -61,7 +63,7 @@ const AnimeDetail = () => {
 
     if (success) {
       Taro.showToast({
-        title: `已添加到${COLLECTION_STATUS[status].label}`,
+        title: `已添加到${COLLECTION_STATUS[status as keyof typeof COLLECTION_STATUS].label}`,
         icon: 'success'
       })
       // 重新加载收藏详情
