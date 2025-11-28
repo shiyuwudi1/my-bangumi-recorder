@@ -1,6 +1,6 @@
 import { Anime, AnimeSearchResult, CalendarDay, Episode } from '../types/anime'
 import { callCloudFunction, showLoading, hideLoading, showToast } from '../utils/request'
-import { CLOUD_FUNCTIONS, BANGUMI_API_BASE, BANGUMI_USER_AGENT } from '../constants'
+import { CLOUD_FUNCTIONS, BANGUMI_API_BASE } from '../constants'
 import { saveSearchHistory } from '../utils/storage'
 import Taro from '@tarojs/taro'
 
@@ -81,10 +81,7 @@ export const getCalendar = async (): Promise<CalendarDay[]> => {
   try {
     const res = await Taro.request({
       url: `${BANGUMI_API_BASE}/calendar`,
-      method: 'GET',
-      header: {
-        'User-Agent': BANGUMI_USER_AGENT
-      }
+      method: 'GET'
     })
 
     if (res.statusCode === 200 && Array.isArray(res.data)) {
@@ -122,8 +119,7 @@ export const getAnimeEpisodes = async (subjectId: number): Promise<{ episodes: a
         offset: 0
       },
       header: {
-        'accept': 'application/json',
-        'User-Agent': BANGUMI_USER_AGENT
+        'accept': 'application/json'
       }
     })
 
