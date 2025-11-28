@@ -7,6 +7,7 @@ cloud.init({
 
 const db = cloud.database()
 const _ = db.command
+const DEFAULT_AVATAR = 'https://static.bgm.tv/img/avatar/ls.jpg'
 
 // 生成6位UID
 async function generateUID() {
@@ -42,6 +43,7 @@ async function generateUID() {
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
+  const { nickname, avatar } = event || {}
 
   try {
     // 查询用户是否存在
@@ -52,11 +54,28 @@ exports.main = async (event, context) => {
     const now = Date.now()
 
     if (userRes.data.length > 0) {
-      // 用户已存在，更新最后登录时间
+      // 用户已存在，更新信息
       const user = userRes.data[0]
-      await db.collection('users').doc(user._id).update({
-        data: { lastLoginTime: now }
-      })
+      const updates = { lastLoginTime: now }
+
+      if (nickname && nickname !== user.nickname) {
+        updates.nickname = nickname
+      }
+
+      if (avatar && avatar !== user.avatar) {
+        updates.avatar = avatar
+      }
+
+      if (!avatar && (!user.avatar || user.avatar === 'cloud://default-avatar.png') && user.avatar !== DEFAULT_AVATAR) {
+        updates.avatar = DEFAULT_AVATAR
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await db.collection('users').doc(user._id).update({
+          data: updates
+        })
+        Object.assign(user, updates)
+      }
 
       return {
         success: true,
@@ -70,8 +89,8 @@ exports.main = async (event, context) => {
       const newUser = {
         _openid: openid,
         uid: uid,
-        nickname: '用户' + uid,
-        avatar: 'cloud://default-avatar.png',
+        nickname: nickname || ('用户' + uid),
+        avatar: avatar || DEFAULT_AVATAR,
         phone: null,
         phoneVerified: false,
         createTime: now,

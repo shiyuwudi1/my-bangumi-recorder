@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { AtIcon, AtList, AtListItem } from 'taro-ui'
 import { User } from '../../types/user'
 import { getUserInfo, logout, uploadAvatar } from '../../services/user'
+import { DEFAULT_AVATAR_URL } from '../../constants'
 import './index.scss'
 
 const Profile = () => {
@@ -64,13 +65,17 @@ const Profile = () => {
     return null
   }
 
+  const resolvedAvatar = user.avatar && user.avatar !== 'cloud://default-avatar.png'
+    ? user.avatar
+    : DEFAULT_AVATAR_URL
+
   return (
     <View className="profile-page">
       {/* 用户信息 */}
       <View className="user-info">
         <View className="avatar" onClick={handleAvatarClick}>
           <Image
-            src={user.avatar || 'https://via.placeholder.com/150'}
+            src={resolvedAvatar}
             mode="aspectFill"
           />
           <View className="avatar-tip">点击更换头像</View>

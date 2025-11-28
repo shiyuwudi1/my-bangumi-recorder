@@ -8,24 +8,36 @@ import { CLOUD_FUNCTIONS, STORAGE_KEYS } from '../constants'
  * 用户登录
  */
 export const login = async (): Promise<User | null> => {
+  let profileData: { nickname?: string; avatar?: string } = {}
+
+  try {
+    const profileRes = await Taro.getUserProfile({
+      desc: '用于完善个人主页信息',
+      lang: 'zh_CN'
+    })
+
+    profileData = {
+      nickname: profileRes.userInfo.nickName,
+      avatar: profileRes.userInfo.avatarUrl
+    }
+  } catch (profileError) {
+    console.warn('获取微信用户信息失败或被拒绝:', profileError)
+  }
+
   showLoading('登录中...')
 
   try {
     console.log('开始调用登录云函数...')
-    const res = await callCloudFunction<LoginResult>(CLOUD_FUNCTIONS.LOGIN, {})
+    const res = await callCloudFunction<LoginResult>(CLOUD_FUNCTIONS.LOGIN, profileData)
     console.log('登录云函数返回结果:', res)
 
     hideLoading()
 
-    // res 的结构是: { success: true, isNewUser: false, user: {...} }
-    // 或者是: { success: true, data: { success: true, isNewUser: false, user: {...} } }
-    // 需要判断具体是哪种
     const loginResult = (res.data || res) as any
     console.log('登录结果解析:', loginResult)
 
     if (res.success && loginResult.user) {
       const user = loginResult.user
-      // 存储到本地
       setStorage(STORAGE_KEYS.USER, user)
 
       if (loginResult.isNewUser) {
@@ -40,7 +52,7 @@ export const login = async (): Promise<User | null> => {
     console.error('登录失败，返回数据:', res)
     showToast(res.error || '登录失败')
     return null
-  } catch (error) {
+  } catch (error: any) {
     hideLoading()
     console.error('登录异常:', error)
     showToast('登录失败: ' + (error.message || error))
