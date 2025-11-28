@@ -54,16 +54,23 @@ const AnimeDetail = () => {
   }
 
   const loadCollectionDetail = async (animeId: number) => {
-    const collection = await getCollectionDetail(animeId)
+    const { collection, isLiked: likedFromServer } = await getCollectionDetail(animeId)
+    setIsLiked(likedFromServer)
+
     if (collection) {
       setCollectionId(collection._id)
       setCollectionStatus(collection.status || null)
-      setIsLiked(collection.isLiked || false)
       setCurrentSeason(collection.currentSeason || 1)
       setCurrentEpisode(collection.currentEpisode || 0)
       // 根据当前集数生成已观看列表
       const watched = Array.from({ length: collection.currentEpisode || 0 }, (_, i) => i + 1)
       setWatchedEpisodes(watched)
+    } else {
+      setCollectionId(null)
+      setCollectionStatus(null)
+      setCurrentSeason(1)
+      setCurrentEpisode(0)
+      setWatchedEpisodes([])
     }
   }
 

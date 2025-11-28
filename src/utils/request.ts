@@ -14,6 +14,8 @@ export interface RequestResult<T = any> {
   success: boolean
   data?: T
   error?: string
+  isLiked?: boolean
+  needLogin?: boolean
 }
 
 export const request = async <T = any>(options: RequestOptions): Promise<RequestResult<T>> => {

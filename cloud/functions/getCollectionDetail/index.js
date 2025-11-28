@@ -12,6 +12,8 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID
   const { animeId } = event
 
+  console.log('[getCollectionDetail] input', { animeId, openid })
+
   if (!animeId) {
     return {
       success: false,
@@ -33,40 +35,49 @@ exports.main = async (event, context) => {
     }
 
     const user = userRes.data[0]
+    const animeIdStr = String(animeId)
+    const likedSet = new Set((user.likedAnimes || []).map(id => String(id)))
+    const isLiked = likedSet.has(animeIdStr)
 
     // 查询收藏
     const collectionRes = await db.collection('collections')
       .where({
         userId: user._id,
-        animeId: animeId.toString()
+        animeId: animeIdStr
       })
       .get()
 
     if (collectionRes.data.length === 0) {
-      // 未收藏
+      console.log('[getCollectionDetail] collection not found, returning like status only', {
+        animeId: animeIdStr,
+        isLiked
+      })
       return {
         success: true,
-        data: null
+        data: null,
+        isLiked
       }
     }
 
     const collection = collectionRes.data[0]
+    const detail = {
+      _id: collection._id,
+      animeId: collection.animeId,
+      animeName: collection.animeName,
+      animeCover: collection.animeCover,
+      status: collection.status,
+      isLiked: isLiked || collection.isLiked,
+      currentSeason: collection.currentSeason || 1,
+      currentEpisode: collection.currentEpisode || 0,
+      totalSeasons: collection.totalSeasons || 1,
+      createTime: collection.createTime,
+      updateTime: collection.updateTime
+    }
 
     return {
       success: true,
-      data: {
-        _id: collection._id,
-        animeId: collection.animeId,
-        animeName: collection.animeName,
-        animeCover: collection.animeCover,
-        status: collection.status,
-        isLiked: collection.isLiked,
-        currentSeason: collection.currentSeason || 1,
-        currentEpisode: collection.currentEpisode || 0,
-        totalSeasons: collection.totalSeasons || 1,
-        createTime: collection.createTime,
-        updateTime: collection.updateTime
-      }
+      data: detail,
+      isLiked: detail.isLiked
     }
   } catch (error) {
     console.error('Get collection detail error:', error)

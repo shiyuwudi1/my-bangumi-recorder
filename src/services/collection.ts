@@ -134,20 +134,20 @@ export const updateWatchProgress = async (
 export const toggleLike = async (animeId: number): Promise<{ success: boolean; isLiked?: boolean; needLogin?: boolean }> => {
   try {
     console.log('切换喜欢状态:', animeId)
-    const res = await callCloudFunction<{ isLiked: boolean }>(
+    const res = await callCloudFunction<any>(
       CLOUD_FUNCTIONS.TOGGLE_LIKE,
       { animeId }
     )
     console.log('切换喜欢状态响应:', res)
 
     if (res.success) {
-      // 云函数直接在响应中返回 isLiked，而不是在 data 中
-      const isLiked = res.data?.isLiked !== undefined ? res.data.isLiked : (res as any).isLiked
+      // 新的云函数直接在响应中返回 isLiked
+      const isLiked = res.isLiked
       showToast(isLiked ? '已喜欢' : '已取消喜欢', 'success')
       return { success: true, isLiked }
     } else {
       // 检查是否是用户不存在的错误
-      if (res.error === '用户不存在' || res.error === '收藏不存在，请先添加收藏') {
+      if (res.error === '用户不存在' || res.needLogin) {
         return { success: false, needLogin: true }
       }
       showToast(res.error || '操作失败')
@@ -189,22 +189,34 @@ export const getMyCollections = async (status?: CollectionStatus): Promise<Colle
 /**
  * 获取收藏详情
  */
-export const getCollectionDetail = async (animeId: number): Promise<Collection | null> => {
+export interface CollectionDetailResult {
+  collection: Collection | null
+  isLiked: boolean
+}
+
+export const getCollectionDetail = async (animeId: number): Promise<CollectionDetailResult> => {
   try {
     const res = await callCloudFunction<Collection>(
       CLOUD_FUNCTIONS.GET_COLLECTION_DETAIL,
       { animeId }
     )
 
-    if (res.success && res.data) {
-      return res.data as any
-    } else {
-      return null
+    if (res.success) {
+      const collectionData = (res.data || null) as Collection | null
+      const likedFlag = typeof res.isLiked === 'boolean'
+        ? res.isLiked
+        : Boolean(collectionData?.isLiked)
+
+      return {
+        collection: collectionData,
+        isLiked: likedFlag
+      }
     }
   } catch (error) {
     console.error('获取收藏详情失败:', error)
-    return null
   }
+
+  return { collection: null, isLiked: false }
 }
 
 /**

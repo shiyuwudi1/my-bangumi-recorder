@@ -72,6 +72,10 @@ export interface AnimeSearchResult {
   type: number;
   updateTime: number;
   _id: string;
+  rating?: {
+    total: number;
+    score: number;
+  };
 }
 
 // 每日放送相关类型

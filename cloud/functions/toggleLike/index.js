@@ -6,14 +6,20 @@ cloud.init({
 })
 
 const db = cloud.database()
-const _ = db.command
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
-  const { animeId } = event
+  const { animeId } = event || {}
+
+  console.log('[toggleLike] invoked', {
+    animeId,
+    openid,
+    hasEvent: !!event
+  })
 
   if (!animeId) {
+    console.warn('[toggleLike] missing animeId')
     return {
       success: false,
       error: '动漫ID不能为空'
@@ -21,62 +27,67 @@ exports.main = async (event, context) => {
   }
 
   try {
-    // 查询用户
     const userRes = await db.collection('users')
       .where({ _openid: openid })
       .get()
 
+    console.log('[toggleLike] user query result', {
+      openid,
+      count: userRes.data.length
+    })
+
     if (userRes.data.length === 0) {
+      console.warn('[toggleLike] user not found', { openid })
       return {
         success: false,
-        error: '用户不存在'
+        error: '用户不存在',
+        needLogin: true
+      }
+    }
+
+    if (!openid) {
+      console.warn('[toggleLike] openid missing with existing user record')
+      return {
+        success: false,
+        needLogin: true,
+        error: '用户未登录'
       }
     }
 
     const user = userRes.data[0]
+    const likedList = user.likedAnimes || []
+    const likedAnime = likedList.includes(animeId)
 
-    // 查询收藏
-    const collectionRes = await db.collection('collections')
-      .where({
-        userId: user._id,
-        animeId: animeId.toString()
-      })
-      .get()
+    console.log('[toggleLike] liked state before toggle', {
+      animeId,
+      likedAnime,
+      likedListLength: likedList.length
+    })
 
-    if (collectionRes.data.length === 0) {
-      return {
-        success: false,
-        error: '收藏不存在，请先添加收藏'
-      }
-    }
+    const newLikedAnimes = likedAnime
+      ? likedList.filter(id => id !== animeId)
+      : [...likedList, animeId]
 
-    const collection = collectionRes.data[0]
-    const newLikedStatus = !collection.isLiked
-
-    // 更新喜欢状态
-    await db.collection('collections').doc(collection._id).update({
+    await db.collection('users').doc(user._id).update({
       data: {
-        isLiked: newLikedStatus,
+        likedAnimes: newLikedAnimes,
         updateTime: Date.now()
       }
     })
 
-    // 更新用户统计
-    const statsUpdate = {
-      'stats.totalLikes': _.inc(newLikedStatus ? 1 : -1)
-    }
-
-    await db.collection('users').doc(user._id).update({
-      data: statsUpdate
+    console.log('[toggleLike] update success', {
+      animeId,
+      nextLiked: !likedAnime,
+      likedCount: newLikedAnimes.length
     })
 
     return {
       success: true,
-      isLiked: newLikedStatus,
-      message: newLikedStatus ? '已喜欢' : '已取消喜欢'
+      isLiked: !likedAnime,
+      message: !likedAnime ? '已喜欢' : '已取消喜欢'
     }
   } catch (error) {
-    console.error('Toggle like error:', error)
+    console.error('[toggleLike] error', error)
     return {
       success: false,
       error: error.message || '操作失败'
