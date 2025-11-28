@@ -1,6 +1,6 @@
 import { Anime, AnimeSearchResult, CalendarDay, Episode } from '../types/anime'
 import { callCloudFunction, showLoading, hideLoading, showToast } from '../utils/request'
-import { CLOUD_FUNCTIONS, BANGUMI_API_BASE } from '../constants'
+import { CLOUD_FUNCTIONS, BANGUMI_API_BASE, BANGUMI_USER_AGENT } from '../constants'
 import { saveSearchHistory } from '../utils/storage'
 import Taro from '@tarojs/taro'
 
@@ -83,7 +83,7 @@ export const getCalendar = async (): Promise<CalendarDay[]> => {
       url: `${BANGUMI_API_BASE}/calendar`,
       method: 'GET',
       header: {
-        'User-Agent': 'MyBangumi/1.0 (https://github.com/my-bangumi)'
+        'User-Agent': BANGUMI_USER_AGENT
       }
     })
 
@@ -123,7 +123,7 @@ export const getAnimeEpisodes = async (subjectId: number): Promise<{ episodes: a
       },
       header: {
         'accept': 'application/json',
-        'User-Agent': 'MyBangumi/1.0 (https://github.com/my-bangumi)'
+        'User-Agent': BANGUMI_USER_AGENT
       }
     })
 

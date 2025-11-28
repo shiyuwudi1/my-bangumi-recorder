@@ -7,6 +7,7 @@ cloud.init({
 })
 
 const db = cloud.database()
+const BANGUMI_USER_AGENT = 'shiyuwudi1/my-bangumi-recorder/1.0.0 (WeChat Mini Program 番组手账) (https://github.com/shiyuwudi1/my-bangumi-recorder)'
 
 exports.main = async (event, context) => {
   const { keyword, type = 2 } = event  // type=2表示动画
@@ -40,7 +41,12 @@ exports.main = async (event, context) => {
     // 2. 缓存未命中，调用Bangumi API
     const response = await axios.get(
       `https://api.bgm.tv/search/subject/${encodeURIComponent(keyword)}`,
-      { params: { type } }
+      {
+        params: { type },
+        headers: {
+          'User-Agent': BANGUMI_USER_AGENT
+        }
+      }
     )
 
     const animeList = response.data.list || []

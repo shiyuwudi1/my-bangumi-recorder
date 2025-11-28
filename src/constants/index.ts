@@ -27,6 +27,7 @@ export const ANIME_TYPE = {
 
 // Bangumi API 基础URL
 export const BANGUMI_API_BASE = 'https://api.bgm.tv'
+export const BANGUMI_USER_AGENT = 'shiyuwudi1/my-bangumi-recorder/1.0.0 (WeChat Mini Program 番组手账) (https://github.com/shiyuwudi1/my-bangumi-recorder)'
 
 // 云函数名称
 export const CLOUD_FUNCTIONS = {
