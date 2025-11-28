@@ -2,84 +2,103 @@ import Taro from '@tarojs/taro'
 import { User, LoginResult } from '../types/user'
 import { callCloudFunction, showLoading, hideLoading, showToast } from '../utils/request'
 import { setStorage, getStorage, removeStorage } from '../utils/storage'
-import { CLOUD_FUNCTIONS, STORAGE_KEYS } from '../constants'
+import { CLOUD_FUNCTIONS, DEFAULT_AVATAR_URL, STORAGE_KEYS } from '../constants'
+
+const LEGACY_DEFAULT_CLOUD_AVATAR = 'cloud://default-avatar.png'
+
+type ProfileData = {
+  nickname?: string
+  avatar?: string
+}
 
 /**
- * 用户登录
+ * ????
  */
-export const login = async (): Promise<User | null> => {
-  let profileData: { nickname?: string; avatar?: string } = {}
+export const login = async (providedProfile?: ProfileData): Promise<User | null> => {
+  let profileData: ProfileData = { ...(providedProfile || {}) }
 
-  try {
-    const profileRes = await Taro.getUserProfile({
-      desc: '用于完善个人主页信息',
-      lang: 'zh_CN'
-    })
+  if (!profileData.nickname || !profileData.avatar) {
+    try {
+      const profileRes = await Taro.getUserProfile({
+        desc: '??????????',
+        lang: 'zh_CN'
+      })
 
-    profileData = {
-      nickname: profileRes.userInfo.nickName,
-      avatar: profileRes.userInfo.avatarUrl
+      profileData = {
+        nickname: profileRes.userInfo.nickName,
+        avatar: profileRes.userInfo.avatarUrl
+      }
+    } catch (profileError) {
+      console.warn('??????????????:', profileError)
     }
-  } catch (profileError) {
-    console.warn('获取微信用户信息失败或被拒绝:', profileError)
   }
 
-  showLoading('登录中...')
+  showLoading('???...')
 
   try {
-    console.log('开始调用登录云函数...')
+    console.log('?????????...')
     const res = await callCloudFunction<LoginResult>(CLOUD_FUNCTIONS.LOGIN, profileData)
-    console.log('登录云函数返回结果:', res)
+    console.log('?????????:', res)
 
     hideLoading()
 
     const loginResult = (res.data || res) as any
-    console.log('登录结果解析:', loginResult)
+    console.log('??????:', loginResult)
 
     if (res.success && loginResult.user) {
       const user = loginResult.user
-      setStorage(STORAGE_KEYS.USER, user)
+      const profileAvatar = profileData.avatar
+      const needsAvatarSync = shouldSyncWeChatAvatar(user.avatar, profileAvatar)
+      const resolvedUser = needsAvatarSync && profileAvatar
+        ? { ...user, avatar: profileAvatar }
+        : user
 
-      if (loginResult.isNewUser) {
-        showToast('欢迎加入！', 'success')
-      } else {
-        showToast('登录成功', 'success')
+      setStorage(STORAGE_KEYS.USER, resolvedUser)
+
+      if (needsAvatarSync && profileAvatar) {
+        await syncAvatarAfterLogin(profileAvatar)
       }
 
-      return user
+      if (loginResult.isNewUser) {
+        showToast('?????', 'success')
+      } else {
+        showToast('????', 'success')
+      }
+
+      return resolvedUser
     }
 
-    console.error('登录失败，返回数据:', res)
-    showToast(res.error || '登录失败')
+    console.error('?????????:', res)
+    showToast(res.error || '????')
     return null
   } catch (error: any) {
     hideLoading()
-    console.error('登录异常:', error)
-    showToast('登录失败: ' + (error.message || error))
+    console.error('????:', error)
+    showToast('????: ' + (error.message || error))
     return null
   }
 }
 
 /**
- * 获取本地用户信息
+ * ????????
  */
 export const getUserInfo = (): User | null => {
   return getStorage<User>(STORAGE_KEYS.USER)
 }
 
 /**
- * 退出登录
+ * ????
  */
 export const logout = () => {
   removeStorage(STORAGE_KEYS.USER)
-  showToast('已退出登录', 'success')
+  showToast('?????', 'success')
 }
 
 /**
- * 更新用户信息
+ * ??????
  */
 export const updateUserProfile = async (data: Partial<User>): Promise<boolean> => {
-  showLoading('更新中...')
+  showLoading('???...')
 
   try {
     const res = await callCloudFunction(CLOUD_FUNCTIONS.UPDATE_USER_PROFILE, data)
@@ -87,32 +106,30 @@ export const updateUserProfile = async (data: Partial<User>): Promise<boolean> =
     hideLoading()
 
     if (res.success) {
-      // 更新本地存储
       const user = getUserInfo()
       if (user) {
         const updatedUser = { ...user, ...data }
         setStorage(STORAGE_KEYS.USER, updatedUser)
       }
 
-      showToast('更新成功', 'success')
+      showToast('????', 'success')
       return true
     } else {
-      showToast(res.error || '更新失败')
+      showToast(res.error || '????')
       return false
     }
   } catch (error) {
     hideLoading()
-    showToast('更新失败')
+    showToast('????')
     return false
   }
 }
 
 /**
- * 上传头像
+ * ????
  */
 export const uploadAvatar = async (): Promise<string | null> => {
   try {
-    // 选择图片
     const chooseRes = await Taro.chooseImage({
       count: 1,
       sizeType: ['compressed'],
@@ -123,20 +140,18 @@ export const uploadAvatar = async (): Promise<string | null> => {
     const user = getUserInfo()
 
     if (!user) {
-      showToast('请先登录')
+      showToast('????')
       return null
     }
 
-    showLoading('上传中...')
+    showLoading('???...')
 
-    // 上传到云存储
     const cloudPath = `avatars/${user.uid}_${Date.now()}.png`
     const uploadRes = await Taro.cloud.uploadFile({
       cloudPath: cloudPath,
       filePath: tempFilePath
     })
 
-    // 更新用户信息
     const updateSuccess = await updateUserProfile({
       avatar: uploadRes.fileID
     })
@@ -152,16 +167,16 @@ export const uploadAvatar = async (): Promise<string | null> => {
   } catch (error) {
     hideLoading()
     console.error('Upload avatar error:', error)
-    showToast('上传失败')
+    showToast('????')
     return null
   }
 }
 
 /**
- * 绑定手机号
+ * ?????
  */
 export const bindPhone = async (phone: string): Promise<boolean> => {
-  showLoading('绑定中...')
+  showLoading('???...')
 
   try {
     const res = await callCloudFunction(CLOUD_FUNCTIONS.BIND_PHONE, { phone })
@@ -169,7 +184,6 @@ export const bindPhone = async (phone: string): Promise<boolean> => {
     hideLoading()
 
     if (res.success) {
-      // 更新本地用户信息
       const user = getUserInfo()
       if (user) {
         user.phone = phone
@@ -177,15 +191,38 @@ export const bindPhone = async (phone: string): Promise<boolean> => {
         setStorage(STORAGE_KEYS.USER, user)
       }
 
-      showToast('绑定成功', 'success')
+      showToast('????', 'success')
       return true
     } else {
-      showToast(res.error || '绑定失败')
+      showToast(res.error || '????')
       return false
     }
   } catch (error) {
     hideLoading()
-    showToast('绑定失败')
+    showToast('????')
     return false
+  }
+}
+
+const shouldSyncWeChatAvatar = (currentAvatar?: string, wechatAvatar?: string): wechatAvatar is string => {
+  if (!wechatAvatar) return false
+  if (!currentAvatar) return true
+
+  const isCustomUpload = currentAvatar.startsWith('cloud://') && currentAvatar !== LEGACY_DEFAULT_CLOUD_AVATAR
+
+  if (isCustomUpload) return false
+  if (currentAvatar === LEGACY_DEFAULT_CLOUD_AVATAR || currentAvatar === DEFAULT_AVATAR_URL) return true
+
+  return currentAvatar !== wechatAvatar
+}
+
+const syncAvatarAfterLogin = async (avatarUrl: string) => {
+  try {
+    const res = await callCloudFunction(CLOUD_FUNCTIONS.UPDATE_USER_PROFILE, { avatar: avatarUrl })
+    if (!res.success) {
+      console.warn('????????:', res.error)
+    }
+  } catch (error) {
+    console.error('????????:', error)
   }
 }

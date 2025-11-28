@@ -1,4 +1,4 @@
-import { View } from '@tarojs/components'
+import { View, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { AtButton, AtIcon } from 'taro-ui'
@@ -7,30 +7,38 @@ import './index.scss'
 
 const Login = () => {
   const [loading, setLoading] = useState(false)
+  const [canUseProfileButton, setCanUseProfileButton] = useState(true)
 
   useEffect(() => {
-    // 监听系统返回按键
     const handleBackPress = () => {
       handleBack()
-      return true // 阻止默认返回行为
+      return true
     }
 
-    // 添加返回按键监听（使用 Taro 的事件监听）
     Taro.eventCenter.on('__taroRouterBack', handleBackPress)
 
-    // 清理函数
+    if (typeof Taro.canIUse === 'function') {
+      const supported = Taro.canIUse('button.open-type.getUserProfile')
+      if (!supported) {
+        setCanUseProfileButton(false)
+      }
+    } else {
+      setCanUseProfileButton(false)
+    }
+
     return () => {
       Taro.eventCenter.off('__taroRouterBack', handleBackPress)
     }
   }, [])
 
-  const handleLogin = async () => {
+  const handleLogin = async (profileData?: { nickname?: string; avatar?: string }) => {
+    if (loading) return
+
     setLoading(true)
-    const user = await login()
+    const user = await login(profileData)
     setLoading(false)
 
     if (user) {
-      // 登录成功，返回上一页或跳转到首页
       setTimeout(() => {
         Taro.switchTab({
           url: '/pages/index/index'
@@ -39,8 +47,20 @@ const Login = () => {
     }
   }
 
+  const handleGetUserProfile = async (event: any) => {
+    const detail = event?.detail
+
+    if (detail?.errMsg === 'getUserProfile:ok' && detail.userInfo) {
+      await handleLogin({
+        nickname: detail.userInfo.nickName,
+        avatar: detail.userInfo.avatarUrl
+      })
+    } else {
+      await handleLogin()
+    }
+  }
+
   const handleBack = () => {
-    // 返回首页
     Taro.switchTab({
       url: '/pages/index/index'
     })
@@ -48,49 +68,62 @@ const Login = () => {
 
   return (
     <View className="login-page">
-      {/* 返回按钮 */}
+      {/* ???? */}
       <View className="back-button" onClick={handleBack}>
         <AtIcon value="chevron-left" size="20" color="#333" />
-        <View className="back-text">返回</View>
+        <View className="back-text">??</View>
       </View>
       
       <View className="login-container">
         <View className="logo">
-          <View className="logo-icon">📺</View>
-          <View className="logo-text">我的番组</View>
+          <View className="logo-icon">??</View>
+          <View className="logo-text">????</View>
         </View>
 
         <View className="welcome">
-          <View className="welcome-title">欢迎使用</View>
-          <View className="welcome-desc">记录你的动漫观看进度</View>
+          <View className="welcome-title">????</View>
+          <View className="welcome-desc">??????????</View>
         </View>
 
         <View className="features">
           <View className="feature-item">
-            <View className="feature-icon">🔍</View>
-            <View className="feature-text">搜索动漫</View>
+            <View className="feature-icon">??</View>
+            <View className="feature-text">????</View>
           </View>
           <View className="feature-item">
-            <View className="feature-icon">📝</View>
-            <View className="feature-text">记录进度</View>
+            <View className="feature-icon">??</View>
+            <View className="feature-text">????</View>
           </View>
           <View className="feature-item">
-            <View className="feature-icon">❤️</View>
-            <View className="feature-text">收藏喜欢</View>
+            <View className="feature-icon">??</View>
+            <View className="feature-text">????</View>
           </View>
         </View>
 
         <View className="login-actions">
-          <AtButton
-            type="primary"
-            size="normal"
-            loading={loading}
-            onClick={handleLogin}
-          >
-            微信一键登录
-          </AtButton>
+          {canUseProfileButton ? (
+            <Button
+              className="wx-login-button"
+              openType="getUserProfile"
+              lang="zh_CN"
+              onGetUserProfile={handleGetUserProfile}
+              loading={loading}
+              disabled={loading}
+            >
+              ??????
+            </Button>
+          ) : (
+            <AtButton
+              type="primary"
+              size="normal"
+              loading={loading}
+              onClick={() => handleLogin()}
+            >
+              ??????
+            </AtButton>
+          )}
           <View className="login-tip">
-            登录即代表同意用户协议和隐私政策
+            ????????????????
           </View>
         </View>
       </View>
