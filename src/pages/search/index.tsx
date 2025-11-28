@@ -22,6 +22,7 @@ const Search = () => {
   const handleSearch = async (searchKeyword: string) => {
     setLoading(true)
     const data = await searchAnime(searchKeyword)
+    console.log('搜索结果:', data)
     setResults(data)
     setLoading(false)
   }

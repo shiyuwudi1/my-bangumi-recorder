@@ -1,11 +1,11 @@
 import { View, Image } from '@tarojs/components'
 import Taro, { useLoad } from '@tarojs/taro'
 import { useState } from 'react'
-import { AtButton, AtIcon } from 'taro-ui'
+import { AtButton, AtIcon, AtFloatLayout } from 'taro-ui'
 import { getAnimeDetail, getAnimeEpisodes } from '../../services/anime'
 import { addCollection, toggleLike, updateWatchProgress, getCollectionDetail } from '../../services/collection'
 import { COLLECTION_STATUS } from '../../constants'
-import { Anime } from '../../types/anime'
+import { Anime, Episode } from '../../types/anime'
 import { CollectionStatus } from '../../types/collection'
 import './index.scss'
 
@@ -20,6 +20,9 @@ const AnimeDetail = () => {
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [airedEpisodes, setAiredEpisodes] = useState(0) // 当前已更新集数
   const [episodesLoading, setEpisodesLoading] = useState(true) // 集数加载状态
+  const [episodesList, setEpisodesList] = useState<Episode[]>([]) // 剧集列表
+  const [showEpisodeDetail, setShowEpisodeDetail] = useState(false) // 显示剧集详情弹窗
+  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null) // 当前选中的剧集
 
   useLoad((options) => {
     const { id } = options
@@ -46,6 +49,7 @@ const AnimeDetail = () => {
     console.log('剧集信息:', episodes)
     console.log('当前更新到第', currentEpisode, '集')
     setAiredEpisodes(currentEpisode)
+    setEpisodesList(episodes) // 保存完整剧集列表
     setEpisodesLoading(false)
   }
 
@@ -111,7 +115,29 @@ const AnimeDetail = () => {
     }
   }
 
-  const handleEpisodeClick = async (episode: number) => {
+  const handleEpisodeClick = (episode: number) => {
+    if (!anime) return
+
+    // 弹出操作菜单
+    Taro.showActionSheet({
+      itemList: [
+        `标记看到第${episode}集`,
+        `查看第${episode}集详情`
+      ],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          // 标记进度
+          handleMarkProgress(episode)
+        } else if (res.tapIndex === 1) {
+          // 查看详情
+          handleShowEpisodeDetail(episode)
+        }
+      }
+    })
+  }
+
+  // 标记观看进度
+  const handleMarkProgress = async (episode: number) => {
     if (!anime) return
 
     // 检查是否已收藏
@@ -123,7 +149,6 @@ const AnimeDetail = () => {
         success: (res) => {
           if (res.confirm) {
             // 用户点击确认，可以滚动到操作按钮部分
-            // 这里可以触发滚动到操作按钮
           }
         }
       })
@@ -148,6 +173,49 @@ const AnimeDetail = () => {
       // 标记为已看：更新到该集
       await updateProgress(episode)
     }
+  }
+
+  // 显示剧集详情
+  const handleShowEpisodeDetail = (episode: number) => {
+    const episodeData = episodesList.find(ep => ep.ep === episode)
+    
+    if (!episodeData) {
+      Taro.showToast({
+        title: '暂无该集详情',
+        icon: 'none'
+      })
+      return
+    }
+
+    setSelectedEpisode(episodeData)
+    setShowEpisodeDetail(true)
+  }
+
+  // 判断剧集是否已播出
+  const isEpisodeAired = (airdate: string): boolean => {
+    if (!airdate) return false
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const airDate = new Date(airdate)
+    airDate.setHours(0, 0, 0, 0)
+    return airDate <= today
+  }
+
+  // 格式化时长
+  const formatDuration = (duration: string): string => {
+    if (!duration) return '未知'
+    // "00:12:55" -> "12分55秒"
+    const parts = duration.split(':')
+    if (parts.length === 3) {
+      const hours = parseInt(parts[0])
+      const minutes = parseInt(parts[1])
+      const seconds = parseInt(parts[2])
+      if (hours > 0) {
+        return `${hours}小时${minutes}分${seconds}秒`
+      }
+      return `${minutes}分${seconds}秒`
+    }
+    return duration
   }
 
   const updateProgress = async (episode: number) => {
@@ -433,6 +501,92 @@ const AnimeDetail = () => {
           </View>
         )}
       </View>
+
+      {/* 剧集详情弹窗 */}
+      <AtFloatLayout
+        isOpened={showEpisodeDetail}
+        title={selectedEpisode ? `第${selectedEpisode.ep}集` : ''}
+        onClose={() => setShowEpisodeDetail(false)}
+      >
+        {selectedEpisode && (
+          <View className="episode-detail-content">
+            {/* 标题 */}
+            <View className="detail-section">
+              <View className="detail-icon">📺</View>
+              <View className="detail-text">
+                <View className="detail-title-cn">
+                  {selectedEpisode.name_cn || selectedEpisode.name || '未命名'}
+                </View>
+                {selectedEpisode.name && selectedEpisode.name !== selectedEpisode.name_cn && (
+                  <View className="detail-title-jp">{selectedEpisode.name}</View>
+                )}
+              </View>
+            </View>
+
+            {/* 播出时间 */}
+            {selectedEpisode.airdate && (
+              <View className="detail-section">
+                <View className="detail-icon">📅</View>
+                <View className="detail-text">
+                  <View className="detail-label">播出时间</View>
+                  <View className="detail-value">
+                    {selectedEpisode.airdate}
+                    <View className={`aired-status ${isEpisodeAired(selectedEpisode.airdate) ? 'aired' : 'not-aired'}`}>
+                      {isEpisodeAired(selectedEpisode.airdate) ? '已播出' : '未播出'}
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* 时长 */}
+            {selectedEpisode.duration && (
+              <View className="detail-section">
+                <View className="detail-icon">⏱️</View>
+                <View className="detail-text">
+                  <View className="detail-label">时长</View>
+                  <View className="detail-value">{formatDuration(selectedEpisode.duration)}</View>
+                </View>
+              </View>
+            )}
+
+            {/* 评论数 */}
+            <View className="detail-section">
+              <View className="detail-icon">💬</View>
+              <View className="detail-text">
+                <View className="detail-label">评论数</View>
+                <View className="detail-value">{selectedEpisode.comment || 0}条</View>
+              </View>
+            </View>
+
+            {/* 剧集简介 */}
+            {selectedEpisode.desc && (
+              <View className="detail-section desc-section">
+                <View className="detail-icon">📝</View>
+                <View className="detail-text">
+                  <View className="detail-label">剧集简介</View>
+                  <View className="detail-desc">{selectedEpisode.desc}</View>
+                </View>
+              </View>
+            )}
+
+            {/* 操作按钮 */}
+            {collectionId && (
+              <View className="detail-actions">
+                <AtButton
+                  type="primary"
+                  onClick={() => {
+                    setShowEpisodeDetail(false)
+                    handleMarkProgress(selectedEpisode.ep)
+                  }}
+                >
+                  标记看到第{selectedEpisode.ep}集
+                </AtButton>
+              </View>
+            )}
+          </View>
+        )}
+      </AtFloatLayout>
     </View>
   )
 }

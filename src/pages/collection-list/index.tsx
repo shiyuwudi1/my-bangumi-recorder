@@ -2,19 +2,28 @@ import { View, Image } from '@tarojs/components'
 import Taro, { useDidShow, useLoad } from '@tarojs/taro'
 import { useState } from 'react'
 import { Collection } from '../../types/collection'
-import { getMyCollections } from '../../services/collection'
+import { getMyCollections, getLikedCollections } from '../../services/collection'
 import './index.scss'
 
 const CollectionList = () => {
   const [status, setStatus] = useState<'watching' | 'watched' | 'wishlist'>('watching')
   const [list, setList] = useState<Collection[]>([])
   const [title, setTitle] = useState('在看')
+  const [isLikedMode, setIsLikedMode] = useState(false)
 
   useLoad((options) => {
-    const { status: queryStatus } = options as any
-    if (queryStatus) {
+    const { status: queryStatus, type } = options as any
+    
+    if (type === 'liked') {
+      // 喜欢模式
+      setIsLikedMode(true)
+      setTitle('我的喜欢')
+      Taro.setNavigationBarTitle({
+        title: '我的喜欢'
+      })
+    } else if (queryStatus) {
+      // 状态模式
       setStatus(queryStatus)
-      // 设置页面标题
       const titles: Record<string, string> = {
         watching: '在看',
         watched: '看过',
@@ -32,7 +41,14 @@ const CollectionList = () => {
   })
 
   const loadCollections = async () => {
-    const data = await getMyCollections(status)
+    let data: Collection[] = []
+    
+    if (isLikedMode) {
+      data = await getLikedCollections()
+    } else {
+      data = await getMyCollections(status)
+    }
+    
     setList(data)
   }
 
@@ -50,7 +66,7 @@ const CollectionList = () => {
 
       {list.length === 0 ? (
         <View className="empty-hint">
-          暂无内容
+          {isLikedMode ? '暂无喜欢的动漫' : '暂无内容'}
         </View>
       ) : (
         <View className="collection-list">

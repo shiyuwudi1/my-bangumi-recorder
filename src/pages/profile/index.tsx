@@ -54,6 +54,12 @@ const Profile = () => {
     })
   }
 
+  const handleLikedClick = () => {
+    Taro.navigateTo({
+      url: '/pages/collection-list/index?type=liked'
+    })
+  }
+
   if (!user) {
     return null
   }
@@ -89,7 +95,7 @@ const Profile = () => {
           <View className="stat-value">{user.stats.wishlist}</View>
           <View className="stat-label">想看</View>
         </View>
-        <View className="stat-item">
+        <View className="stat-item" onClick={handleLikedClick}>
           <View className="stat-value">{user.stats.totalLikes}</View>
           <View className="stat-label">喜欢</View>
         </View>

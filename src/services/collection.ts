@@ -133,10 +133,12 @@ export const updateWatchProgress = async (
  */
 export const toggleLike = async (animeId: number): Promise<{ success: boolean; isLiked?: boolean; needLogin?: boolean }> => {
   try {
+    console.log('切换喜欢状态:', animeId)
     const res = await callCloudFunction<{ isLiked: boolean }>(
       CLOUD_FUNCTIONS.TOGGLE_LIKE,
       { animeId }
     )
+    console.log('切换喜欢状态响应:', res)
 
     if (res.success) {
       // 云函数直接在响应中返回 isLiked，而不是在 data 中
@@ -202,5 +204,32 @@ export const getCollectionDetail = async (animeId: number): Promise<Collection |
   } catch (error) {
     console.error('获取收藏详情失败:', error)
     return null
+  }
+}
+
+/**
+ * 获取我喜欢的动漫列表
+ */
+export const getLikedCollections = async (): Promise<Collection[]> => {
+  showLoading('加载中...')
+
+  try {
+    const res = await callCloudFunction<Collection[]>(
+      CLOUD_FUNCTIONS.GET_MY_COLLECTIONS,
+      { isLiked: true }
+    )
+
+    hideLoading()
+
+    if (res.success && Array.isArray(res.data)) {
+      return res.data
+    } else {
+      showToast(res.error || '获取失败')
+      return []
+    }
+  } catch (error) {
+    hideLoading()
+    showToast('获取失败')
+    return []
   }
 }

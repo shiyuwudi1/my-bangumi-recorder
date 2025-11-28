@@ -10,7 +10,7 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
-  const { status, page = 1, pageSize = 20 } = event
+  const { status, isLiked, page = 1, pageSize = 20 } = event
 
   try {
     // 查询用户
@@ -31,6 +31,9 @@ exports.main = async (event, context) => {
     const whereCondition = { userId: user._id }
     if (status) {
       whereCondition.status = status
+    }
+    if (isLiked !== undefined) {
+      whereCondition.isLiked = isLiked
     }
 
     // 查询收藏列表
