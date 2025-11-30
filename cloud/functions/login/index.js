@@ -45,8 +45,8 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
   console.log('[CLOUD LOGIN] OpenID:', openid)
-  const { nickname, avatar } = event || {}
-  console.log('[CLOUD LOGIN] Provided profile:', { nickname, avatar })
+  const { nickname, avatar, onlyCheck } = event || {}
+  console.log('[CLOUD LOGIN] Provided profile:', { nickname, avatar, onlyCheck })
 
   try {
     // 查询用户是否存在
@@ -61,6 +61,15 @@ exports.main = async (event, context) => {
       // 用户已存在，更新信息
       const user = userRes.data[0]
       const updates = { lastLoginTime: now }
+
+      if (onlyCheck) {
+        console.log('[CLOUD LOGIN] onlyCheck=true, skip updating user, return existing data')
+        return {
+          success: true,
+          isNewUser: false,
+          user
+        }
+      }
 
       if (nickname && nickname !== user.nickname) {
         updates.nickname = nickname
@@ -87,6 +96,26 @@ exports.main = async (event, context) => {
         user: user
       }
     } else {
+      if (onlyCheck) {
+        console.log('[CLOUD LOGIN] onlyCheck=true, user not found, need profile setup')
+        return {
+          success: true,
+          isNewUser: true,
+          needProfile: true,
+          user: null
+        }
+      }
+
+      if (!nickname || !avatar) {
+        console.warn('[CLOUD LOGIN] Missing nickname or avatar when creating user')
+        return {
+          success: false,
+          isNewUser: true,
+          needProfile: true,
+          error: '请先选择头像并输入昵称后再登录'
+        }
+      }
+
       // 新用户，创建账号
       const uid = await generateUID()
 

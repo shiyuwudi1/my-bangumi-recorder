@@ -75,6 +75,31 @@ export const login = async (providedProfile?: ProfileData): Promise<User | null>
   }
 }
 
+export const checkExistingUser = async (): Promise<{ user: User | null; needProfile: boolean }> => {
+  try {
+    try {
+      await Taro.login()
+    } catch (loginError) {
+      console.warn('[CHECK USER] wx.login failed:', loginError)
+    }
+
+    const res = await callCloudFunction<LoginResult>(CLOUD_FUNCTIONS.LOGIN, { onlyCheck: true })
+    const loginResult = (res.data || res) as LoginResult
+
+    if (loginResult.success && loginResult.user) {
+      return { user: loginResult.user, needProfile: false }
+    }
+
+    return {
+      user: null,
+      needProfile: loginResult.needProfile !== false
+    }
+  } catch (error) {
+    console.error('[CHECK USER] error:', error)
+    return { user: null, needProfile: true }
+  }
+}
+
 /**
  * 获取用户信息
  */

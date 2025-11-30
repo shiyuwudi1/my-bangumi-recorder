@@ -2,7 +2,7 @@ import { View, Button, Input } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { AtButton, AtIcon } from 'taro-ui'
-import { login } from '../../services/user'
+import { login, checkExistingUser } from '../../services/user'
 import './index.scss'
 
 const Login = () => {
@@ -10,6 +10,10 @@ const Login = () => {
   const [userAvatar, setUserAvatar] = useState<string>('')
   const [userNickname, setUserNickname] = useState<string>('')
   const [showNicknameInput, setShowNicknameInput] = useState(false)
+  const [initializing, setInitializing] = useState(true)
+  const [hasExistingProfile, setHasExistingProfile] = useState(false)
+  const [needsProfileSetup, setNeedsProfileSetup] = useState(false)
+  const [autoLoginError, setAutoLoginError] = useState('')
 
   useEffect(() => {
     const handleBackPress = () => {
@@ -25,7 +29,7 @@ const Login = () => {
   }, [])
 
   const handleLogin = async (profileData?: { nickname?: string; avatar?: string }) => {
-    if (loading) return
+    if (loading) return false
 
     setLoading(true)
     const user = await login(profileData)
@@ -37,7 +41,10 @@ const Login = () => {
           url: '/pages/index/index'
         })
       }, 500)
+      return true
     }
+
+    return false
   }
 
   // 处理选择头像
@@ -76,6 +83,33 @@ const Login = () => {
     })
   }
 
+  useEffect(() => {
+    const autoLoginIfNeeded = async () => {
+      setAutoLoginError('')
+      setHasExistingProfile(false)
+      setNeedsProfileSetup(false)
+      setInitializing(true)
+
+      const result = await checkExistingUser()
+
+      if (result.user) {
+        setHasExistingProfile(true)
+        const loggedIn = await handleLogin()
+        if (loggedIn) {
+          return
+        }
+        setAutoLoginError('自动登录失败，请点击下方按钮重试')
+        setInitializing(false)
+        return
+      }
+
+      setNeedsProfileSetup(true)
+      setInitializing(false)
+    }
+
+    autoLoginIfNeeded()
+  }, [])
+
   return (
     <View className="login-page">
       {/* 返回按钮 */}
@@ -111,50 +145,65 @@ const Login = () => {
         </View>
 
         <View className="login-actions">
-          {!showNicknameInput ? (
+          {initializing ? (
+            <View className="login-loading">正在读取账号信息...</View>
+          ) : hasExistingProfile ? (
             <>
-              <Button
-                className="avatar-button"
-                openType="chooseAvatar"
-                onChooseAvatar={handleChooseAvatar}
-              >
-                选择头像并登录
-              </Button>
-              <AtButton
-                type="secondary"
-                size="normal"
-                loading={loading}
-                onClick={() => handleLogin()}
-                disabled={loading}
-                style={{ marginTop: '10px' }}
-              >
-                匿名登录
-              </AtButton>
-            </>
-          ) : (
-            <View className="nickname-input-section">
-              <View className="input-label">请输入昵称</View>
-              <Input
-                type="nickname"
-                className="nickname-input"
-                placeholder="请输入昵称"
-                onBlur={handleNicknameChange}
-              />
+              <View className="existing-login-title">欢迎回来</View>
+              <View className="existing-login-desc">检测到你已登录过，直接使用已保存的头像和昵称即可。</View>
+              {autoLoginError && (
+                <View className="login-tip error-text">{autoLoginError}</View>
+              )}
               <AtButton
                 type="primary"
                 size="normal"
                 loading={loading}
-                onClick={handleCompleteLogin}
+                onClick={() => handleLogin()}
                 disabled={loading}
-                style={{ marginTop: '10px' }}
+                style={{ marginTop: '20px' }}
               >
-                完成登录
+                直接登录
               </AtButton>
-            </View>
-          )}
-          <View className="login-tip">
-            选择头像并输入昵称后登录，或使用匿名登录（后续可在个人中心修改）
-          </View>
+              <View className="login-tip">
+                如需更新头像或昵称，可登录后在「我的」页面中修改
+              </View>
+            </>
+          ) : needsProfileSetup ? (
+            <>
+              {!showNicknameInput ? (
+                <Button
+                  className="avatar-button"
+                  openType="chooseAvatar"
+                  onChooseAvatar={handleChooseAvatar}
+                >
+                  选择头像并登录
+                </Button>
+              ) : (
+                <View className="nickname-input-section">
+                  <View className="input-label">请输入昵称</View>
+                  <Input
+                    type="nickname"
+                    className="nickname-input"
+                    placeholder="请输入昵称"
+                    onBlur={handleNicknameChange}
+                  />
+                  <AtButton
+                    type="primary"
+                    size="normal"
+                    loading={loading}
+                    onClick={handleCompleteLogin}
+                    disabled={loading}
+                    style={{ marginTop: '10px' }}
+                  >
+                    完成登录
+                  </AtButton>
+                </View>
+              )}
+              <View className="login-tip">
+                首次登录需选择头像并填写昵称，后续可在个人中心随时修改
+              </View>
+            </>
+          ) : null}
         </View>
       </View>
     </View>

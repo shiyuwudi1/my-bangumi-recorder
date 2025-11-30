@@ -25,4 +25,5 @@ export interface LoginResult {
   isNewUser: boolean
   user?: User
   error?: string
+  needProfile?: boolean
 }
