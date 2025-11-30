@@ -41,15 +41,19 @@ async function generateUID() {
 }
 
 exports.main = async (event, context) => {
+  console.log('[CLOUD LOGIN] Received event:', event)
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
+  console.log('[CLOUD LOGIN] OpenID:', openid)
   const { nickname, avatar } = event || {}
+  console.log('[CLOUD LOGIN] Provided profile:', { nickname, avatar })
 
   try {
     // 查询用户是否存在
     const userRes = await db.collection('users')
       .where({ _openid: openid })
       .get()
+    console.log('[CLOUD LOGIN] Existing user query:', userRes.data.length > 0 ? 'found' : 'not found', userRes.data[0] || 'no data')
 
     const now = Date.now()
 

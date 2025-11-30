@@ -84,6 +84,54 @@
     }
 
     .login-actions {
+      .avatar-button {
+        width: 100%;
+        height: 96rpx;
+        line-height: 96rpx;
+        border-radius: 48rpx;
+        background-color: $white;
+        color: #42BD56;
+        font-size: 32rpx;
+        font-weight: 600;
+        border: none;
+        box-shadow: $shadow-lg;
+        margin-bottom: $spacing-sm;
+
+        &::after {
+          border: none;
+        }
+
+        &[disabled] {
+          opacity: 0.8;
+        }
+      }
+
+      .nickname-input-section {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30rpx;
+        border-radius: 20rpx;
+        margin-bottom: $spacing-md;
+
+        .input-label {
+          font-size: 28rpx;
+          color: #333;
+          margin-bottom: 20rpx;
+          font-weight: 500;
+        }
+
+        .nickname-input {
+          width: 100%;
+          height: 80rpx;
+          line-height: 80rpx;
+          background: $white;
+          border: 2rpx solid #E0E0E0;
+          border-radius: 12rpx;
+          padding: 0 24rpx;
+          font-size: 28rpx;
+          margin-bottom: 20rpx;
+        }
+      }
+
       .wx-login-button {
         width: 100%;
         height: 96rpx;

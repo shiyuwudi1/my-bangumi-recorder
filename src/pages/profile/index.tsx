@@ -1,36 +1,93 @@
-import { View, Image } from '@tarojs/components'
+import { View, Image, Button, Input } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { useState } from 'react'
-import { AtIcon, AtList, AtListItem } from 'taro-ui'
+import { useState, useEffect } from 'react'
+import { AtIcon, AtList, AtListItem, AtToast } from 'taro-ui'
 import { User } from '../../types/user'
-import { getUserInfo, logout, uploadAvatar } from '../../services/user'
+import { getUserInfo, logout, updateUserProfile } from '../../services/user'
 import { DEFAULT_AVATAR_URL } from '../../constants'
 import './index.scss'
 
 const Profile = () => {
   const [user, setUser] = useState<User | null>(null)
+  const [pendingAvatar, setPendingAvatar] = useState('')
+  const [pendingNickname, setPendingNickname] = useState('')
+  const [isEditingNickname, setIsEditingNickname] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState<{ text: string; type?: 'success' | 'error' } | null>(null)
 
   useDidShow(() => {
     loadUserInfo()
   })
 
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 2500)
+      return () => clearTimeout(timer)
+    }
+  }, [toast])
+
   const loadUserInfo = () => {
     const userInfo = getUserInfo()
     setUser(userInfo)
+    if (userInfo) {
+      setPendingAvatar('')
+      setPendingNickname(userInfo.nickname || '')
+    }
 
     if (!userInfo) {
-      // 未登录，跳转到登录页（使用redirectTo避免返回循环）
       Taro.redirectTo({
         url: '/pages/login/index'
       })
     }
   }
 
-  const handleAvatarClick = async () => {
-    const avatar = await uploadAvatar()
-    if (avatar) {
-      loadUserInfo()
+  const handleChooseAvatar = (e: any) => {
+    const avatarUrl = e.detail.avatarUrl
+    console.log('[PROFILE] Avatar chosen:', avatarUrl)
+    setPendingAvatar(avatarUrl)
+  }
+
+  const handleNicknameTap = () => {
+    setIsEditingNickname(true)
+    setPendingNickname(user?.nickname || '')
+  }
+
+  const handleNicknameInput = (e: any) => {
+    setPendingNickname(e.detail.value || '')
+  }
+
+  const handleNicknameConfirm = () => {
+    setIsEditingNickname(false)
+  }
+
+  const hasPendingChanges = !!pendingAvatar || pendingNickname !== (user?.nickname || '')
+
+  const handleSaveProfile = async () => {
+    if (!hasPendingChanges || saving) return
+
+    setSaving(true)
+    const updates: any = {}
+    if (pendingAvatar) {
+      updates.avatar = pendingAvatar
     }
+    if (pendingNickname !== user?.nickname) {
+      updates.nickname = pendingNickname
+    }
+
+    const success = await updateUserProfile(updates)
+    setSaving(false)
+
+    if (success) {
+      setToast({ text: '资料已更新', type: 'success' })
+      loadUserInfo()
+    } else {
+      setToast({ text: '更新失败，请重试', type: 'error' })
+    }
+  }
+
+  const handleDiscardChanges = () => {
+    setPendingAvatar('')
+    setPendingNickname(user?.nickname || '')
   }
 
   const handleLogout = () => {
@@ -65,28 +122,67 @@ const Profile = () => {
     return null
   }
 
-  const resolvedAvatar = user.avatar && user.avatar !== 'cloud://default-avatar.png'
-    ? user.avatar
-    : DEFAULT_AVATAR_URL
+  const resolvedAvatar = pendingAvatar || (user.avatar && user.avatar !== 'cloud://default-avatar.png' ? user.avatar : DEFAULT_AVATAR_URL)
 
   return (
     <View className="profile-page">
-      {/* 用户信息 */}
       <View className="user-info">
-        <View className="avatar" onClick={handleAvatarClick}>
-          <Image
-            src={resolvedAvatar}
-            mode="aspectFill"
-          />
-          <View className="avatar-tip">点击更换头像</View>
+        <View className="avatar-container">
+          <View className="avatar-wrapper">
+            <Image className="avatar" src={resolvedAvatar} mode="aspectFill" />
+            <Button
+              className="choose-avatar-overlay"
+              openType="chooseAvatar"
+              onChooseAvatar={handleChooseAvatar}
+            >
+              <AtIcon value="camera" size={24} color="#fff" />
+            </Button>
+          </View>
+          {pendingAvatar && (
+            <View className="avatar-pending">头像已更改</View>
+          )}
         </View>
         <View className="user-details">
-          <View className="nickname">{user.nickname}</View>
+          <View className="nickname-container" onClick={handleNicknameTap}>
+            {isEditingNickname ? (
+              <Input
+                className="nickname-input-edit"
+                type="text"
+                value={pendingNickname}
+                placeholder="昵称"
+                onInput={handleNicknameInput}
+                onConfirm={handleNicknameConfirm}
+                onBlur={handleNicknameConfirm}
+                maxlength={20}
+                focus
+              />
+            ) : (
+              <View className="nickname">{pendingNickname || user.nickname}</View>
+            )}
+          </View>
           <View className="uid">UID: {user.uid}</View>
         </View>
       </View>
 
-      {/* 统计信息 */}
+      {hasPendingChanges && (
+        <View className="save-bar">
+          <View className="save-actions">
+            <View className="discard-btn" onClick={handleDiscardChanges}>取消</View>
+            <View className="save-btn" onClick={handleSaveProfile}>
+              {saving ? '保存中...' : '保存'}
+            </View>
+          </View>
+        </View>
+      )}
+
+      <AtToast
+        isOpened={!!toast}
+        text={toast?.text}
+        status={toast?.type}
+        onClose={() => setToast(null)}
+        duration={2500}
+      />
+
       <View className="stats-section">
         <View className="stat-item" onClick={() => handleStatClick('watching')}>
           <View className="stat-value">{user.stats.watching}</View>
@@ -106,7 +202,6 @@ const Profile = () => {
         </View>
       </View>
 
-      {/* 设置列表 */}
       <View className="settings-section">
         <AtList>
           <AtListItem
