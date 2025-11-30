@@ -51,5 +51,6 @@ export const CLOUD_FUNCTIONS = {
 export const STORAGE_KEYS = {
   USER: 'user',
   TOKEN: 'token',
-  SEARCH_HISTORY: 'search_history'
+  SEARCH_HISTORY: 'search_history',
+  DEFAULT_WEEKDAY: 'default_weekday'
 }

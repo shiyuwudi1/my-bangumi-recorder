@@ -1,17 +1,28 @@
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { AtSearchBar } from 'taro-ui'
 import { CalendarDay, CalendarItem } from '../../types/anime'
 import { getCalendar } from '../../services/anime'
-import { getSearchHistory, clearSearchHistory } from '../../utils/storage'
+import { getSearchHistory, clearSearchHistory, getDefaultWeekday, saveDefaultWeekday } from '../../utils/storage'
 import './index.scss'
 
 const Index = () => {
   const [keyword, setKeyword] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>([])
+  const getInitialDay = () => {
+    const storedDay = getDefaultWeekday()
+    if (storedDay !== null) {
+      return storedDay
+    }
+    const today = new Date().getDay()
+    const dayIndex = today === 0 ? 6 : today - 1
+    saveDefaultWeekday(dayIndex)
+    return dayIndex
+  }
+
   const [calendarData, setCalendarData] = useState<CalendarDay[]>([])
-  const [currentDay, setCurrentDay] = useState(0) // 当前选中的星期
+  const [currentDay, setCurrentDay] = useState(getInitialDay) // 当前选中的星期
   const [loading, setLoading] = useState(false)
 
   // 星期映射
@@ -20,12 +31,6 @@ const Index = () => {
   useEffect(() => {
     loadSearchHistory()
     loadCalendarData()
-
-    // 设置当前星期
-    const today = new Date().getDay()
-    // 转换为周一=0的格式
-    const dayIndex = today === 0 ? 6 : today - 1
-    setCurrentDay(dayIndex)
   }, [])
 
   const loadSearchHistory = () => {
@@ -89,6 +94,7 @@ const Index = () => {
 
   const handleDayChange = (index: number) => {
     setCurrentDay(index)
+    saveDefaultWeekday(index)
   }
 
   const getCurrentDayItems = (): CalendarItem[] => {
@@ -161,7 +167,7 @@ const Index = () => {
         <View className="section-title">每日放送</View>
 
         {/* 星期选择器 */}
-        <ScrollView scrollX className="weekday-tabs">
+        <View className="weekday-tabs">
           {weekdays.map((day, index) => (
             <View
               key={index}
@@ -172,7 +178,7 @@ const Index = () => {
               {currentDay === index && <View className="tab-indicator" />}
             </View>
           ))}
-        </ScrollView>
+        </View>
 
         {/* 动漫列表 */}
         <View className="anime-list">

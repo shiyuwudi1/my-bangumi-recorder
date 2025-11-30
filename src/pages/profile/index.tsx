@@ -1,7 +1,7 @@
 import { View, Image, Button, Input } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState, useEffect } from 'react'
-import { AtIcon, AtList, AtListItem, AtToast } from 'taro-ui'
+import { AtIcon, AtList, AtListItem, AtModal, AtModalAction, AtModalContent, AtToast } from 'taro-ui'
 import { User } from '../../types/user'
 import { getUserInfo, logout, updateUserProfile } from '../../services/user'
 import { DEFAULT_AVATAR_URL } from '../../constants'
@@ -14,6 +14,7 @@ const Profile = () => {
   const [isEditingNickname, setIsEditingNickname] = useState(false)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ text: string; type?: 'success' | 'error' } | null>(null)
+  const [aboutVisible, setAboutVisible] = useState(false)
 
   useDidShow(() => {
     loadUserInfo()
@@ -118,6 +119,21 @@ const Profile = () => {
     })
   }
 
+  const handleOpenAbout = () => {
+    setAboutVisible(true)
+  }
+
+  const handleCloseAbout = () => {
+    setAboutVisible(false)
+  }
+
+  const handleExploreApp = () => {
+    setAboutVisible(false)
+    Taro.switchTab({
+      url: '/pages/index/index'
+    })
+  }
+
   if (!user) {
     return null
   }
@@ -202,7 +218,7 @@ const Profile = () => {
         </View>
       </View>
 
-      <View className="settings-section">
+      <View className={`settings-section ${hasPendingChanges ? 'with-save-bar' : ''}`}>
         <AtList>
           <AtListItem
             title="手机号绑定"
@@ -213,6 +229,7 @@ const Profile = () => {
           <AtListItem
             title="关于我们"
             arrow="right"
+            onClick={handleOpenAbout}
             iconInfo={{ value: 'alert-circle', color: '#42BD56', size: 22 }}
           />
           <AtListItem
@@ -223,6 +240,61 @@ const Profile = () => {
           />
         </AtList>
       </View>
+
+      <AtModal
+        isOpened={aboutVisible}
+        onClose={handleCloseAbout}
+        closeOnClickOverlay
+        className="about-modal"
+      >
+        <AtModalContent>
+          <View className="about-modal__container">
+            <View className="about-modal__header">
+              <View className="about-modal__tag">My Bangumi Recorder</View>
+              <View className="about-modal__title">关于我们</View>
+              <View className="about-modal__subtitle">
+                我们是一款专注番剧记录的轻量应用，帮你用最顺手的方式管理「在看 / 想看 / 看过」，同步热榜、提醒更新，让追番不再错过任何亮点。
+              </View>
+            </View>
+
+            <View className="about-modal__features">
+              <View className="about-feature-card">
+                <View className="about-feature-card__title">智能追番</View>
+                <View className="about-feature-card__desc">按状态分类整理清单，实时同步热度与详情，记录你的每一次心动。</View>
+              </View>
+              <View className="about-feature-card">
+                <View className="about-feature-card__title">更新提醒</View>
+                <View className="about-feature-card__desc">一键查看最新话数，系统会在番剧更新时提示，不再错过每一集。</View>
+              </View>
+              <View className="about-feature-card">
+                <View className="about-feature-card__title">社交互动</View>
+                <View className="about-feature-card__desc">点赞喜欢、展示个人收藏，和同好一起分享追番灵感。</View>
+              </View>
+            </View>
+
+            <View className="about-modal__steps">
+              <View className="about-step">
+                <View className="about-step__index">01</View>
+                <View className="about-step__text">搜索你想看的番剧，加入想看或收藏，打造专属片单。</View>
+              </View>
+              <View className="about-step">
+                <View className="about-step__index">02</View>
+                <View className="about-step__text">更新到新集时勾选进度，系统自动同步统计，记录成长轨迹。</View>
+              </View>
+              <View className="about-step">
+                <View className="about-step__index">03</View>
+                <View className="about-step__text">用喜欢功能表达态度，让更多人发现好番，找到同频伙伴。</View>
+              </View>
+            </View>
+
+            <View className="about-modal__quote">「记录每一次追番的怦然心动，让热爱被看见」</View>
+          </View>
+        </AtModalContent>
+        <AtModalAction>
+          <Button className="about-modal__action" onClick={handleCloseAbout}>知道了</Button>
+          <Button className="about-modal__action about-modal__action--primary" onClick={handleExploreApp}>立即体验</Button>
+        </AtModalAction>
+      </AtModal>
     </View>
   )
 }

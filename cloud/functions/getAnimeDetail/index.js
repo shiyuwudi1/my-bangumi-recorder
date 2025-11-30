@@ -9,7 +9,7 @@ cloud.init({
 const db = cloud.database()
 
 const BANGUMI_API_BASE = 'https://api.bgm.tv'
-const BANGUMI_USER_AGENT = 'shiyuwudi1/my-bangumi-recorder/1.0.0 (WeChat Mini Program Bangumi) (https://github.com/shiyuwudi1/my-bangumi-recorder)'
+const BANGUMI_USER_AGENT = 'my-bangumi-recorder/1.0.0 wechat-mini-program'
 
 exports.main = async (event, context) => {
   console.log('getAnimeDetail 接收到的 event:', JSON.stringify(event))

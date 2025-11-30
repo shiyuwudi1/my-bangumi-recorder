@@ -4,14 +4,18 @@
 
   .user-info {
     background: linear-gradient(135deg, #42BD56 0%, #2E9944 100%);
-    padding: 40px 20px;
+    padding: 24px 28px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    min-height: 160px;
 
     .avatar-container {
       position: relative;
-      margin-bottom: 20px;
+      margin-bottom: 0;
+      flex-shrink: 0;
 
       .avatar-wrapper {
         position: relative;
@@ -67,7 +71,8 @@
     }
 
     .user-details {
-      text-align: center;
+      text-align: left;
+      flex: 1;
 
       .nickname-container {
         cursor: pointer;
@@ -77,7 +82,7 @@
         }
 
         .nickname {
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 600;
           color: $white;
           margin-bottom: $spacing-xs;
@@ -110,6 +115,7 @@
       .uid {
         font-size: $font-size-sm;
         color: rgba(255, 255, 255, 0.8);
+        margin-top: 4px;
       }
     }
   }
@@ -118,15 +124,15 @@
   .stats-section {
     display: flex;
     background-color: $white;
-    margin: $spacing-md;
+    margin: $spacing-sm $spacing-md $spacing-md;
     border-radius: $radius-md;
-    padding: $spacing-lg 0;
+    padding: $spacing-md 0;
     box-shadow: $shadow-md;
 
     .stat-item {
       flex: 1;
       text-align: center;
-      padding: $spacing-md;
+      padding: $spacing-sm;
       transition: background-color 0.2s;
 
       &:active {
@@ -134,14 +140,14 @@
       }
 
       .stat-value {
-        font-size: 24px;
+        font-size: 22px;
         font-weight: bold;
         color: $primary-color;
-        margin-bottom: $spacing-xs;
+        margin-bottom: 4px;
       }
 
       .stat-label {
-        font-size: $font-size-sm;
+        font-size: 26rpx;
         color: $text-secondary;
       }
     }
@@ -198,7 +204,159 @@
 
   .settings-section {
     margin: $spacing-md;
-    margin-top: 120px; // for save-bar space
+    margin-top: $spacing-md;
+
+    &.with-save-bar {
+      margin-top: 120px; // extra space when save bar is visible
+    }
+  }
+}
+
+.about-modal {
+  .at-modal__container {
+    border-radius: 28px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .at-modal__content {
+    padding: 0;
+    background: transparent;
+  }
+
+  .about-modal__container {
+    padding: 28px 28px 12px;
+    background: linear-gradient(145deg, #f0fff5 0%, #ffffff 100%);
+  }
+
+  .about-modal__header {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+
+  .about-modal__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a7d3e;
+    background: rgba(26, 125, 62, 0.12);
+    margin-bottom: 10px;
+  }
+
+  .about-modal__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+  }
+
+  .about-modal__subtitle {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4f5b62;
+  }
+
+  .about-modal__features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .about-feature-card {
+    border-radius: 16px;
+    padding: 16px;
+    background: rgba(66, 189, 86, 0.08);
+    border: 1px solid rgba(66, 189, 86, 0.12);
+    box-shadow: 0 6px 20px rgba(66, 189, 86, 0.08);
+  }
+
+  .about-feature-card__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1c7b3d;
+    margin-bottom: 6px;
+  }
+
+  .about-feature-card__desc {
+    font-size: 14px;
+    color: #3b4a54;
+    line-height: 1.6;
+  }
+
+  .about-modal__steps {
+    border-radius: 20px;
+    padding: 18px;
+    background: #0f1c26;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .about-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .about-step__index {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 1px;
+    min-width: 32px;
+  }
+
+  .about-step__text {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .about-modal__quote {
+    text-align: center;
+    font-size: 14px;
+    color: #2c3d46;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .at-modal__action {
+    display: flex;
+    padding: 16px 20px 24px;
+    gap: 16px;
+    background: #f6f8f9;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  .about-modal__action {
+    flex: 1;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a7d3e;
+    background: #fff;
+    border: 1px solid rgba(26, 125, 62, 0.3);
+    box-shadow: 0 6px 18px rgba(26, 125, 62, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 12px rgba(26, 125, 62, 0.12);
+    }
+  }
+
+  .about-modal__action--primary {
+    color: #fff !important;
+    background: linear-gradient(135deg, #3dd598, #23b39d);
+    border: none;
+    box-shadow: 0 12px 24px rgba(35, 179, 157, 0.35);
   }
 }
 

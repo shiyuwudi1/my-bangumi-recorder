@@ -60,17 +60,24 @@
     }
 
     .weekday-tabs {
-      white-space: nowrap;
+      display: flex;
+      justify-content: space-between;
+      gap: $spacing-xs;
       margin-bottom: $spacing-md;
       background-color: $white;
       border-radius: $radius-md;
-      padding: $spacing-sm 0;
+      padding: $spacing-sm $spacing-xs;
+      position: sticky;
+      top: 0;
+      z-index: 9;
+      box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.04);
 
       .weekday-tab {
-        display: inline-block;
-        padding: $spacing-sm $spacing-lg;
+        flex: 1;
+        padding: $spacing-sm 0;
         text-align: center;
         position: relative;
+        border-radius: $radius-sm;
 
         .weekday-text {
           font-size: $font-size-md;
@@ -78,6 +85,8 @@
         }
 
         &.active {
+          background-color: rgba($primary-color, 0.06);
+
           .weekday-text {
             color: $primary-color;
             font-weight: 600;

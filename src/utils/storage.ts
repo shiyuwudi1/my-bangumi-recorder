@@ -75,3 +75,22 @@ export const getSearchHistory = (): string[] => {
 export const clearSearchHistory = (): void => {
   removeStorage(STORAGE_KEYS.SEARCH_HISTORY)
 }
+
+/**
+ * 保存默认展示的星期索引（0-6，周一至周日）
+ */
+export const saveDefaultWeekday = (dayIndex: number): void => {
+  if (dayIndex < 0 || dayIndex > 6) return
+  setStorage(STORAGE_KEYS.DEFAULT_WEEKDAY, dayIndex)
+}
+
+/**
+ * 获取默认展示的星期索引
+ */
+export const getDefaultWeekday = (): number | null => {
+  const stored = getStorage<number>(STORAGE_KEYS.DEFAULT_WEEKDAY)
+  if (typeof stored === 'number' && stored >= 0 && stored <= 6) {
+    return stored
+  }
+  return null
+}
